@@ -1,0 +1,3 @@
+allowBuilds:
+  '@danmarshall/deckgl-typings': true
+  esbuild: true
