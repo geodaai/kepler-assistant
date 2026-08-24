@@ -38,6 +38,7 @@
   "engines": {
     "node": ">=20"
   },
+  "packageManager": "pnpm@11.1.2",
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.18",
     "@geoda/core": "^0.0.22",
