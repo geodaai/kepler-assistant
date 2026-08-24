@@ -1,12 +1,14 @@
 {
   "name": "kepler-assistant",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "The kepler.gl AI assistant: the analysis engines (data.*, geoda.*, geo.*, chart.*) + agent loop + the kepler-agnostic ChatToolSurface, composing the @kepler.gl/mcp map surface so one assistant exposes both the map commands and the compute engines.",
   "license": "MIT",
-  "private": true,
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -28,7 +30,10 @@
   "scripts": {
     "generate-skills": "node scripts/generate-skills.mjs",
     "build": "node scripts/generate-skills.mjs && tsup",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm build"
   },
   "engines": {
     "node": ">=20"
@@ -72,8 +77,11 @@
     "@types/node": "^22.0.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "eslint": "^10.9.1",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.68.0",
+    "vitest": "^4.1.11"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

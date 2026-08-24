@@ -16,5 +16,4 @@ import {tool as aiTool} from 'ai';
 // untyped `ToolSet` in `ai-assistant-v2/store.ts` - so nothing downstream
 // depends on `tool()`'s precise generic return type. Relax it once here
 // instead of casting at each call site.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const tool: (definition: any) => any = aiTool as any;

@@ -1,5 +1,5 @@
 import type {RoomCommand} from '@sqlrooms/room-store';
-import {getKeplerCommands, KEPLER_COMMAND_OWNER} from '@kepler.gl/mcp';
+import {getKeplerCommands} from '@kepler.gl/mcp';
 import type {KeplerContext} from '@kepler.gl/mcp';
 import {getGeoCommands} from './geo-commands';
 import {getGeodaAnalysisCommand} from './geoda-analysis-command';

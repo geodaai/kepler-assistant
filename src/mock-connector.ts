@@ -26,7 +26,7 @@ export function createMockConnector() {
   const recorded: string[] = [];
   return {
     type: 'wasm' as const,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     async query(sql: string): Promise<any> {
       recorded.push(sql);
       // chart.histogram selects `<col> AS _v`; return the sample numbers so the

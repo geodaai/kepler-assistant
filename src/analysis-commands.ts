@@ -370,7 +370,7 @@ export class AnalysisEngine {
   }
 
   private async geodaThiessen(args: Record<string, any>): Promise<ToolResult> {
-    const {datasetName, outputDatasetName} = args;
+    const {outputDatasetName} = args;
     const geometries = await this.resolveGeometries(args);
     if (!Array.isArray(geometries) || !geometries.length) {
       return {
@@ -394,7 +394,7 @@ export class AnalysisEngine {
   }
 
   private async geodaMst(args: Record<string, any>): Promise<ToolResult> {
-    const {datasetName, outputDatasetName} = args;
+    const {outputDatasetName} = args;
     const geometries = await this.resolveGeometries(args);
     if (!Array.isArray(geometries) || !geometries.length) {
       return {
@@ -607,7 +607,7 @@ export class AnalysisEngine {
   }
 
   private async geodaClassify(args: Record<string, any>): Promise<ToolResult> {
-    const {datasetName, variableName, method, k = 5, hinge = 1.5} = args;
+    const {datasetName, variableName, method, k = 5} = args;
     const values = await this.columnValues(datasetName, variableName);
     let breaks: number[];
     // Note: @geoda/core functions take (k, values) — order matters.

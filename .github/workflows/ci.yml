@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # NOTE: install resolves all deps, including `@kepler.gl/mcp` — currently a
+      # local `file:` dependency in package.json. Until that line is flipped to a
+      # published version (or git ref), `pnpm install` fails on CI. This is the one
+      # deferred step blocking a green run; everything else in this workflow is final.
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm build
+
+      - run: pnpm test

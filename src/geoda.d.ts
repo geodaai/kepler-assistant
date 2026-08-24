@@ -17,7 +17,6 @@ declare module '@geoda/core' {
   export function standardDeviationBreaks(values: number[]): Promise<number[]>;
   export function hinge15Breaks(values: number[]): Promise<number[]>;
   export function hinge30Breaks(values: number[]): Promise<number[]>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function createWeights(props: any): Promise<any>;
   export function standardize(values: number[]): Promise<number[]>;
   export function standardizeMAD(values: number[]): Promise<number[]>;
@@ -27,28 +26,19 @@ declare module '@geoda/core' {
   export function rawRates(event: number[], base: number[]): Promise<number[]>;
   export function excessRisk(event: number[], base: number[]): Promise<number[]>;
   export function empiricalBayes(event: number[], base: number[]): Promise<number[]>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function getThiessenPolygons(props: {geoms: any[]}): Promise<any[]>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function getMinimumSpanningTree(props: {geoms: any[]}): Promise<any[]>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function getCartogram(geometries: any[], values: number[], iterations: number): Promise<any[]>;
 }
 
 declare module '@geoda/lisa' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function localMoran(props: any): Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function localGeary(props: any): Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function spatialLag(values: any, weights: any): Promise<any>;
 }
 
 declare module '@geoda/regression' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function linearRegression(props: any): Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function spatialLagRegression(props: any): Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export function spatialError(props: any): Promise<any>;
 }
