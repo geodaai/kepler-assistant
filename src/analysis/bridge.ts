@@ -18,7 +18,7 @@ import type {KeplerBridge} from '../kepler-bridge';
 import {tableFromArrays} from 'apache-arrow';
 import {updateDataset} from '@kepler.gl/actions';
 import {arrowSchemaToFields} from '@kepler.gl/processors';
-import type {KeplerContext} from '@kepler.gl/mcp';
+import type {KeplerContext} from '../mcp';
 import {
   getValuesFromDataset,
   getGeometriesFromDataset,

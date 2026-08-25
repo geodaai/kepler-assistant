@@ -1,7 +1,7 @@
 import type {RoomCommand} from '@sqlrooms/room-store';
 import {z} from 'zod';
 import {runAnalysis} from '../analysis';
-import type {KeplerContext} from '@kepler.gl/mcp';
+import type {KeplerContext} from '../mcp';
 import {getGeometriesFromDataset, datasetNameToTableName} from '../glue/utils';
 import {getTableAsGeoJSON, saveGeojsonToDuckdb} from '../glue/duckdb-cache';
 import {getRoutingCommand} from './routing-command';

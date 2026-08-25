@@ -1,7 +1,8 @@
 ## Host integration (kepler-assistant)
 
 This section is appended by kepler-assistant's `scripts/generate-skills.mjs` on
-top of the map-surface skill shipped by `@kepler.gl/mcp`. It carries the
+top of the map-surface skill vendored at `src/mcp/skill/kepler` (temporarily
+integrated from the kepler.gl `@kepler.gl/mcp` module). It carries the
 harness-specific details that belong to this assistant, not to the map surface.
 
 - All map commands are issued through the `executeApi` tool:

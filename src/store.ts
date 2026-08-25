@@ -44,7 +44,7 @@ import {loadTableIntoDuckDB} from './commands/query-commands';
 import {createWrappedQueryTool} from './tools/query-tool-wrapper';
 import {getAllCommands, KEPLER_COMMAND_OWNER} from './commands';
 import {layerSetIsValid} from '@kepler.gl/actions';
-import type {KeplerContext, KeplerStateAccessors, VisState} from '@kepler.gl/mcp';
+import type {KeplerContext, KeplerStateAccessors, VisState} from './mcp';
 import type {SkillListing} from '@sqlrooms/ai';
 import {createRegistryChatSurface} from './mcp/chat-surface';
 
@@ -118,8 +118,8 @@ export function getKeplerContext(): KeplerContext {
     },
     dispatch: (action: any) => reduxStore?.dispatch(action),
     // The kepler-app-bound glue methods. Implemented here (in the host-facing
-    // store) so the map.* commands in @kepler.gl/mcp stay free of the DuckDB /
-    // kepler-app wiring.
+    // store) so the map.* commands in the vendored map surface (./mcp) stay
+    // free of the DuckDB / kepler-app wiring.
     getValuesFromDataset: (datasetName, variableName) => {
       const visState = keplerStateAccessors?.getVisState();
       if (!visState) return [];

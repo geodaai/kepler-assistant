@@ -5,6 +5,14 @@ The **kepler.gl AI assistant** — the analysis MCP services (`data.*`, `geoda.*
 composing the kepler-mcp **map contract** so one assistant exposes both the map
 surface and the compute engines.
 
+> **Temporary integration:** the map surface (`@kepler.gl/mcp`'s `map.*` commands
+> + `skill/kepler`) is **vendored at `src/mcp/`** so this repo is self-contained
+> for prototyping (no publish step, no cross-repo `file:` dep). This vendored
+> copy is the **single edit surface** during the temporary period; the kepler.gl
+> repo's `src/mcp/` module is removed for now (only the demo-app changes there).
+> See **`NEXT_PLAN.md`** for the permanent separation. Do not import
+> `@kepler.gl/mcp` from this repo or the demo-app during the temporary period.
+
 ## Roles
 
 - **kepler.gl** = the map app.
@@ -23,8 +31,8 @@ surface and the compute engines.
 - `src/chat/` — the **kepler-agnostic chat harness** that consumes
   `ChatToolSurface`: the skills runtime (`executeApi`, `runSkill`,
   `discoverSkill`, skill storage, model resolution, prompt building) and the
-  shared AI-settings config. Exposed as the browser-safe `kepler-assistant/chat`
-  subpath. The kepler.gl demo-app imports it and provides its kepler command
+  shared AI-settings config. Exposed as the browser-safe
+  `@openassistant/kepler-assistant/chat` subpath. The kepler.gl demo-app imports it and provides its kepler command
   registry as the `ChatToolSurface` adapter (plus its seed skills).
 - `src/analysis-commands.ts`, `src/duckdb-engine.ts` — the analysis engine
   (`data.*`, all charts, the full `geoda.analysis` surface, `geo.*`), running
@@ -51,9 +59,10 @@ node dist/cli.js                 # serve map + analysis over stdio
 ## Demo-app
 
 The kepler.gl demo-app imports `AnalysisEngine` from the browser-safe
-`kepler-assistant/engine` subpath (backed by its duckdb-wasm connector), so the
-app and the MCP service run the identical analysis component. It also imports
-the chat harness from the browser-safe `kepler-assistant/chat` subpath, providing
+`@openassistant/kepler-assistant/engine` subpath (backed by its duckdb-wasm
+connector), so the app and the MCP service run the identical analysis component.
+It also imports the chat harness from the browser-safe
+`@openassistant/kepler-assistant/chat` subpath, providing
 its kepler command registry as a `ChatToolSurface` (via
 `createRegistryChatSurface`) and its bundled skills as the storage seeds.
 

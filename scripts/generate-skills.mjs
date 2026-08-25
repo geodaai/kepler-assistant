@@ -3,10 +3,11 @@
  * Bundle built-in skills from real files on disk into a TypeScript module.
  *
  * Sources:
- *  - the `kepler` skill comes from the installed `@kepler.gl/mcp` package
- *    (`skill/kepler/`), so the map.* skill lives in the repo that owns the
- *    map commands. This repo's harness-specific notes
- *    (`scripts/kepler-skill.harness.md`) are appended to its SKILL.md.
+ *  - the `kepler` skill comes from the map surface **vendored** at
+ *    `src/mcp/skill/kepler/` (temporarily integrated from the kepler.gl
+ *    `@kepler.gl/mcp` module, which permanently owns the map commands). This
+ *    repo's harness-specific notes (`scripts/kepler-skill.harness.md`) are
+ *    appended to its SKILL.md.
  *  - every other skill comes from `skills/built-in/<id>/` in this repo.
  *
  * Each source directory is expected to contain `skill.yaml` and `SKILL.md`
@@ -19,11 +20,9 @@
  */
 
 import {existsSync, readdirSync, readFileSync, writeFileSync, statSync} from 'node:fs';
-import {createRequire} from 'node:module';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const SKILLS_DIR = join(ROOT, 'skills/built-in');
@@ -31,6 +30,12 @@ const OUTPUT = join(ROOT, 'src/chat/bundledSkills.ts');
 const ROOT_ID = 'built-in';
 const MCP_SKILL_ID = 'kepler';
 const HARNESS_FILE = join(__dirname, 'kepler-skill.harness.md');
+
+/**
+ * The vendored map-surface skill, temporarily integrated from the kepler.gl
+ * `@kepler.gl/mcp` module. See NEXT_PLAN.md for the permanent separation.
+ */
+const MCP_SKILL_DIR = join(ROOT, 'src/mcp/skill/kepler');
 
 /**
  * @param {string} dir
@@ -48,38 +53,8 @@ function readSkillFiles(dir) {
   return files;
 }
 
-/**
- * Resolve the `@kepler.gl/mcp` package root and return the path to its
- * `skill/kepler` directory. Works through pnpm's `file:` symlink: we resolve
- * the package's main entry (dist/index.js) and walk up to the package root,
- * falling back to a node_modules walk for the case where `dist` is not yet
- * built.
- */
-function resolveMcpSkillDir() {
-  // 1) Through the package main entry (realpath of the file: symlink).
-  try {
-    const entry = require.resolve('@kepler.gl/mcp'); // <pkg>/dist/index.js
-    const candidate = join(dirname(dirname(entry)), 'skill', MCP_SKILL_ID);
-    if (existsSync(join(candidate, 'SKILL.md'))) return candidate;
-  } catch {
-    // package main not resolvable (dist not built yet) — fall through
-  }
-  // 2) Walk up for a node_modules/@kepler.gl/mcp symlink.
-  let dir = ROOT;
-  while (dirname(dir) !== dir) {
-    const candidate = join(dir, 'node_modules', '@kepler.gl', 'mcp', 'skill', MCP_SKILL_ID);
-    if (existsSync(join(candidate, 'SKILL.md'))) return candidate;
-    dir = dirname(dir);
-  }
-  throw new Error(
-    `Could not resolve the kepler skill from @kepler.gl/mcp (skill/${MCP_SKILL_ID}). ` +
-      `Run "pnpm install" so the file: dependency is linked into node_modules, ` +
-      `or confirm the skill exists in the package.`
-  );
-}
-
 function main() {
-  // Local skills, minus the one that ships with @kepler.gl/mcp.
+  // Local skills, minus the one vendored at src/mcp/skill/kepler.
   const localDirs = readdirSync(SKILLS_DIR)
     .map(name => ({name, path: join(SKILLS_DIR, name)}))
     .filter(entry => statSync(entry.path).isDirectory())
@@ -92,8 +67,9 @@ function main() {
     files: readSkillFiles(path)
   }));
 
-  // Kepler skill from @kepler.gl/mcp, with harness notes appended.
-  const keplerSkillDir = resolveMcpSkillDir();
+  // Kepler skill from the vendored map surface (src/mcp/skill/kepler), with
+  // harness notes appended.
+  const keplerSkillDir = MCP_SKILL_DIR;
   const keplerFiles = readSkillFiles(keplerSkillDir);
   if (existsSync(HARNESS_FILE)) {
     const harness = readFileSync(HARNESS_FILE, 'utf8');

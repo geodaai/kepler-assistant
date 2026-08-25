@@ -4,7 +4,7 @@ import {addDataToMap} from '@kepler.gl/actions';
 import {processFileData} from '@kepler.gl/processors';
 import {getConnector, arrowTableToObjects, datasetNameToTableName} from './utils';
 import type {DuckDbConnector} from '@sqlrooms/duckdb';
-import type {KeplerContext} from '@kepler.gl/mcp';
+import type {KeplerContext} from '../mcp';
 
 let _cachedTableContext = '';
 

@@ -7,8 +7,10 @@
  * `highlightRows`, `formatResultsForLLM`, ...).
  *
  * This is the only layer that imports `@kepler.gl/*` runtime packages; the
- * `@kepler.gl/mcp` commands stay kepler-app-bound through the `KeplerContext`
- * seam, and the analysis engine stays kepler-agnostic through `KeplerBridge`.
+ * vendored map-surface commands (`../mcp`, temporarily integrated from the
+ * kepler.gl `@kepler.gl/mcp` module) stay kepler-app-bound through the
+ * `KeplerContext` seam, and the analysis engine stays kepler-agnostic through
+ * `KeplerBridge`.
  */
 
 export * from './utils';

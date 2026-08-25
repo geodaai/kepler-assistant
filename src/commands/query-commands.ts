@@ -4,7 +4,7 @@ import {z} from 'zod';
 import {tableFromArrays, Table as ArrowTable} from 'apache-arrow';
 import {addDataToMap} from '@kepler.gl/actions';
 import {processFileData} from '@kepler.gl/processors';
-import type {KeplerContext} from '@kepler.gl/mcp';
+import type {KeplerContext} from '../mcp';
 import {
   getValuesFromDataset,
   getConnector,

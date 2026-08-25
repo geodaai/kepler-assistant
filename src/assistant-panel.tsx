@@ -3,7 +3,7 @@ import {RoomStateProvider} from '@sqlrooms/room-store';
 import {ThemeProvider, TooltipProvider, Toaster} from '@sqlrooms/ui';
 import {roomStore, setReduxStore, setKeplerStateAccessors} from './store';
 import {MainView} from './components/MainView';
-import type {KeplerStateAccessors} from '@kepler.gl/mcp';
+import type {KeplerStateAccessors} from './mcp';
 
 export {setReduxStore, setKeplerStateAccessors} from './store';
 
