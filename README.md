@@ -44,11 +44,38 @@ surface and the compute engines.
   `map.*` with the analysis tools on one MCP server; `cli.ts` runs it over
   stdio/HTTP.
 
+## Skills
+
+The assistant's seed skills are bundled into `src/chat/bundledSkills.ts` by
+`scripts/generate-skills.mjs` (run automatically on `pnpm build`). Each skill is
+a `skill.yaml` manifest + `SKILL.md` prompt body, and comes from one of three
+sources:
+
+- **`kepler`** — the map-surface skill, **vendored** at `src/mcp/skill/kepler/`
+  (temporarily integrated from the kepler.gl `@kepler.gl/mcp` module, which
+  permanently owns the map commands). This host's notes in
+  `scripts/kepler-skill.harness.md` are appended to its `SKILL.md`.
+- **`geoda-analysis`** — **sourced** from the `@geoda/*` library repo
+  (`geoda-lib/skills/geoda-analysis`) so the harness-agnostic spatial-analysis
+  skill lives in one place; this host's command surface
+  (`scripts/geoda-skill.harness.md`) is appended on top. Only `skill.yaml` +
+  `SKILL.md` are bundled — the plugin packaging there (`package.json`,
+  `.claude-plugin/`, `scripts/analyze.mjs`) belongs to the standalone skill
+  (also usable as a Claude Code plugin). Point at another checkout with the
+  `GEODA_SKILL_DIR` env var.
+- **everything else** (`charts`, `colocation`, `spatial-filter`,
+  `us-boundaries`) — from `skills/built-in/<id>/` in this repo.
+
+Regenerate the bundle with `node scripts/generate-skills.mjs`.
+
 ## Run
 
 ```sh
 pnpm install
-pnpm build
+pnpm build        # runs scripts/generate-skills.mjs first; needs the
+                  # geoda-analysis skill dir to exist (default: the geoda-lib
+                  # checkout at ~/github/geoda-lib/skills/geoda-analysis, or
+                  # set GEODA_SKILL_DIR to point at it)
 node scripts/verify-engine.mjs   # analysis engine over MCP
 node scripts/verify-agent.mjs    # agent loop
 node scripts/verify-surface.mjs  # ChatToolSurface conformance
