@@ -22,6 +22,24 @@ jobs:
       # repo), so install resolves every dep from npm/workspace.
       - run: pnpm install --frozen-lockfile
 
+      # The geoda-analysis skill is sourced from the geoda-lib repo
+      # (geodaai/geodalib:skills/geoda-analysis) so the harness-agnostic skill
+      # lives in one place; generate-skills.mjs bundles its skill.yaml + SKILL.md
+      # and appends this host's harness notes. GEODA_SKILL_DIR defaults to a
+      # machine-local path, so fetch the two files here for CI.
+      # GEODA_REPO_REF is the geoda-lib ref to bundle; pin it to a tag/commit
+      # for fully reproducible builds.
+      - name: Fetch geoda-analysis skill from geoda-lib
+        env:
+          GEODA_REPO_REF: main
+        run: |
+          mkdir -p /tmp/geoda-skill
+          for f in SKILL.md skill.yaml; do
+            curl -fsSL -o "/tmp/geoda-skill/$f" \
+              "https://raw.githubusercontent.com/geodaai/geodalib/${GEODA_REPO_REF}/skills/geoda-analysis/$f"
+          done
+          echo "GEODA_SKILL_DIR=/tmp/geoda-skill" >> "$GITHUB_ENV"
+
       - run: pnpm lint
 
       - run: pnpm build

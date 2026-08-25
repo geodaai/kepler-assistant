@@ -23,6 +23,21 @@ jobs:
       # package.json is the deferred step.
       - run: pnpm install --frozen-lockfile
 
+      # `pnpm publish` runs the `prepublishOnly` script (`pnpm build`), and the
+      # build's generate-skills.mjs bundles the geoda-analysis skill sourced from
+      # the geoda-lib repo. Fetch the two skill files (skill.yaml + SKILL.md) here,
+      # since GEODA_SKILL_DIR defaults to a machine-local path (see ci.yml).
+      - name: Fetch geoda-analysis skill from geoda-lib
+        env:
+          GEODA_REPO_REF: main
+        run: |
+          mkdir -p /tmp/geoda-skill
+          for f in SKILL.md skill.yaml; do
+            curl -fsSL -o "/tmp/geoda-skill/$f" \
+              "https://raw.githubusercontent.com/geodaai/geodalib/${GEODA_REPO_REF}/skills/geoda-analysis/$f"
+          done
+          echo "GEODA_SKILL_DIR=/tmp/geoda-skill" >> "$GITHUB_ENV"
+
       # `pnpm publish` runs the `prepublishOnly` script (`pnpm build`), so dist/ is
       # built fresh and shipped via the `files` field.
       #

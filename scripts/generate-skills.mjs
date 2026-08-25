@@ -37,8 +37,11 @@ const MCP_SKILL_ID = 'kepler';
 const HARNESS_FILE = join(__dirname, 'kepler-skill.harness.md');
 const GEODA_SKILL_ID = 'geoda-analysis';
 const GEODA_HARNESS_FILE = join(__dirname, 'geoda-skill.harness.md');
+// Default to a sibling geoda-lib checkout (../geoda-lib relative to this repo)
+// when GEODA_SKILL_DIR is unset; CI sets GEODA_SKILL_DIR explicitly (see
+// .github/workflows/ci.yml). No hardcoded machine paths.
 const GEODA_SKILL_DIR =
-  process.env.GEODA_SKILL_DIR || '/Users/xun/github/geoda-lib/skills/geoda-analysis';
+  process.env.GEODA_SKILL_DIR || join(ROOT, '../geoda-lib/skills/geoda-analysis');
 
 /**
  * The vendored map-surface skill, temporarily integrated from the kepler.gl
@@ -104,7 +107,11 @@ function main() {
   // the plugin packaging (package.json, .claude-plugin/, scripts/) belongs to
   // the standalone skill and is not needed by this host.
   if (!existsSync(GEODA_SKILL_DIR)) {
-    console.error(`GEODA_SKILL_DIR not found: ${GEODA_SKILL_DIR}`);
+    console.error(
+      `geoda-analysis skill not found at ${GEODA_SKILL_DIR}\n` +
+        `Set GEODA_SKILL_DIR to a checkout of geoda-lib/skills/geoda-analysis, or ` +
+        `keep this repo next to a geoda-lib checkout (../geoda-lib).`
+    );
     process.exit(1);
   }
   const geodaFiles = readSkillFiles(GEODA_SKILL_DIR)
