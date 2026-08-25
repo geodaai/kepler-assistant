@@ -25,6 +25,11 @@ jobs:
 
       # `pnpm publish` runs the `prepublishOnly` script (`pnpm build`), so dist/ is
       # built fresh and shipped via the `files` field.
-      - run: pnpm publish --access public
+      #
+      # --no-git-checks: a tag-triggered run checks out at the tag (detached HEAD,
+      # not on main), which trips pnpm's default branch check (ERR_PNPM_GIT_UNKNOWN_BRANCH).
+      # CI publishes a fixed commit with a clean tree, so the git checks add nothing
+      # here — auth, version-exists, and build checks still run.
+      - run: pnpm publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

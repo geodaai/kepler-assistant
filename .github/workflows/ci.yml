@@ -18,10 +18,8 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      # NOTE: install resolves all deps, including `@kepler.gl/mcp` — currently a
-      # local `file:` dependency in package.json. Until that line is flipped to a
-      # published version (or git ref), `pnpm install` fails on CI. This is the one
-      # deferred step blocking a green run; everything else in this workflow is final.
+      # The @kepler.gl/mcp map surface is vendored at src/mcp/ (self-contained
+      # repo), so install resolves every dep from npm/workspace.
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm lint
