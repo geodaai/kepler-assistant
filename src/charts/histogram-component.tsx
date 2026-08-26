@@ -1,5 +1,11 @@
 import React, {useMemo, useRef} from 'react';
-import ReactEChartsCore from 'echarts-for-react/lib/core';
+// Use the ESM build (`esm/core`, the package's `module` entry) rather than
+// `lib/core`. The CJS `lib/core` exports both `__esModule` and
+// `exports.default`; when this ESM package is bundled by esbuild the import is
+// treated with Node-style interop (`__toESM(mod, 1)`), so a bare default import
+// resolves to the whole `module.exports` object instead of the component and
+// React throws "Element type is invalid … got: object".
+import ReactEChartsCore from 'echarts-for-react/esm/core';
 
 import * as echarts from 'echarts/core';
 import {use as echartsUse, registerTheme as echartsRegisterTheme} from 'echarts/core';
