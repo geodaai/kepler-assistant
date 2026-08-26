@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest';
+import {tableFromJSON} from 'apache-arrow';
 import {AnalysisEngine} from './analysis-commands';
 import {createMockConnector} from './mock-connector';
 
@@ -51,6 +52,30 @@ describe('AnalysisEngine', () => {
     const analysis = makeEngine();
     const res = await analysis.invoke('chart.histogram', {table: 'sales', column: 'amount', bins: 2});
     expect((res.data as {totalValues?: number}).totalValues).toBe(4);
+  });
+
+  it('chart.histogram lists available tables when the requested one is missing', async () => {
+    // A connector that throws DuckDB's binder error for missing tables and
+    // answers `information_schema.tables` (used by listTables) with the real
+    // catalog — so the engine can tell the model what DOES exist.
+    const connector = createMockConnector();
+    const throwingQuery = async (sql: string) => {
+      if (/information_schema\.tables/.test(sql)) {
+        return tableFromJSON([
+          {table_name: 'sales'},
+          {table_name: 'tbl_nyc_geojson'},
+          {table_name: 'nyc.geojson'}
+        ]);
+      }
+      throw new Error('Catalog Error: Table with name NYC does not exist!');
+    };
+    connector.query = throwingQuery as any;
+    const analysis = new AnalysisEngine(connector as any);
+    const res = await analysis.invoke('chart.histogram', {table: 'NYC', column: 'RENT2008', bins: 4});
+    expect(res.success).toBe(false);
+    expect(res.error).toContain('does not exist');
+    expect(res.error).toContain('"nyc.geojson"');
+    expect(res.error).toContain('"sales"');
   });
 
   it('chart.boxplot computes median and IQR', async () => {

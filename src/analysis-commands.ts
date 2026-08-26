@@ -108,6 +108,30 @@ export class AnalysisEngine {
   }
 
   /**
+   * Turn raw connector errors into messages the model can self-correct from.
+   * A DuckDB binder error for a missing table ("Catalog Error: Table with name
+   * X does not exist!") is the most common dead-end in chart/query commands:
+   * the model guesses a dataset name and gets no hint about what DOES exist.
+   * Append the live list of DuckDB tables (which includes the verbatim-name
+   * dataset VIEWs like "nyc.geojson") so it can retry in one step instead of
+   * improvising a SHOW TABLES workaround.
+   */
+  private async friendlyError(error: unknown): Promise<string> {
+    const message = error instanceof Error ? error.message : String(error);
+    const missing = message.match(/Table(?:\s+with\s+name)?\s+"?([^"'!;]+?)"?\s+does not exist/i);
+    if (!missing) return message;
+    try {
+      const tables = await this.db.listTables();
+      if (tables.length) {
+        return `${message} Available tables: ${tables.map(t => `"${t}"`).join(', ')}.`;
+      }
+    } catch {
+      // The connector may be mid-transaction; fall back to the raw error.
+    }
+    return message;
+  }
+
+  /**
    * Resolve GeoJSON geometries for a geoda spatial op: the caller's explicit
    * `geometries` arg wins, then the bridge's dataset geometries.
    */
@@ -164,7 +188,7 @@ export class AnalysisEngine {
           return {success: false, error: `No analysis handler for "${tool}"`};
       }
     } catch (error) {
-      return {success: false, error: error instanceof Error ? error.message : String(error)};
+      return {success: false, error: await this.friendlyError(error)};
     }
   }
 

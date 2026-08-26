@@ -136,50 +136,77 @@ export function getQueryCommands(ctx: KeplerContext): Record<string, RoomCommand
 IMPORTANT: Use __TABLE__ as the table name placeholder in SQL. It will be replaced with the actual DuckDB table name at runtime.`,
     metadata: {readOnly: true, riskLevel: 'medium', idempotent: true},
     inputSchema: z.object({
-      datasetName: z.string(),
+      datasetName: z
+        .string()
+        .optional()
+        .describe(
+          'The dataset to query. Required only when sql uses the __TABLE__ placeholder; omit for introspection queries (SHOW TABLES, DESCRIBE, information_schema).'
+        ),
       variableNames: z
         .array(z.string())
+        .optional()
         .describe('Only use variable names that already exist in the dataset.'),
       sql: z
         .string()
-        .describe('The SQL query to execute. Use __TABLE__ as the table name placeholder.'),
+        .describe('The SQL query to execute. Use __TABLE__ as the table name placeholder when querying a dataset.'),
       resultDatasetName: z
         .string()
-        .describe('A short, unique snake_case name describing the query result.')
+        .optional()
+        .describe(
+          'Optional snake_case name to save the query result as a new dataset/table. Omit for read-only introspection queries.'
+        )
     }) as any,
     execute: async (_execCtx, input) => {
       const {datasetName, variableNames, sql, resultDatasetName} = (input ?? {}) as {
-        datasetName: string;
-        variableNames: string[];
+        datasetName?: string;
+        variableNames?: string[];
         sql: string;
-        resultDatasetName: string;
+        resultDatasetName?: string;
       };
       try {
-        const dbTableName = datasetNameToTableName(datasetName);
-        const resolvedSql = sql.replace(/__TABLE__/g, `"${dbTableName}"`);
-        await loadTableIntoDuckDB(getValues, datasetName, variableNames, dbTableName);
+        const dbTableName = datasetName ? datasetNameToTableName(datasetName) : undefined;
+        const resolvedSql = dbTableName
+          ? sql.replace(/__TABLE__/g, `"${dbTableName}"`)
+          : sql;
+        if (!dbTableName && /__TABLE__/.test(sql)) {
+          return {
+            success: false,
+            commandId: 'data.query',
+            error:
+              'sql references __TABLE__ but no datasetName was provided. Pass a datasetName, or run an introspection query that does not use __TABLE__.',
+            data: {instruction: 'Retry with datasetName, or run a table-listing query without __TABLE__.'}
+          };
+        }
+        if (dbTableName) {
+          await loadTableIntoDuckDB(getValues, datasetName!, variableNames ?? [], dbTableName);
+        }
         const jsonResult = await runQueryRows(resolvedSql);
 
         const truncatedQueryResult = tableToLLMResult(jsonResult);
 
-        await saveToDuckdb(datasetNameToTableName(resultDatasetName), {
-          type: 'rowObjects',
-          content: jsonResult
-        });
+        const data: Record<string, unknown> = {
+          truncatedQueryResult,
+          totalRows: jsonResult.length,
+          sql: resolvedSql
+        };
+        if (dbTableName) data.dbTableName = dbTableName;
+        if (resultDatasetName) {
+          await saveToDuckdb(datasetNameToTableName(resultDatasetName), {
+            type: 'rowObjects',
+            content: jsonResult
+          });
+          data.datasetName = resultDatasetName;
+          data.instruction = `Query executed successfully. The complete result is in dataset ${resultDatasetName} (${jsonResult.length} rows). The truncated result is just a preview.`;
+          data.nextStep = `You can visualize this result on a map by calling createKeplerDatasetFromTable with datasetName="${resultDatasetName}".`;
+        } else {
+          data.instruction = `Query executed successfully (${jsonResult.length} rows). The truncated result is just a preview. No result dataset was saved.`;
+        }
 
         // Trimmed, model-facing subset (ported from the old `toModelOutput`).
         return {
           success: true,
           commandId: 'data.query',
-          data: {
-            datasetName: resultDatasetName,
-            truncatedQueryResult,
-            totalRows: jsonResult.length,
-            instruction: `Query executed successfully. The complete result is in dataset ${resultDatasetName} (${jsonResult.length} rows). The truncated result is just a preview.`,
-            nextStep: `You can visualize this result on a map by calling createKeplerDatasetFromTable with datasetName="${resultDatasetName}".`,
-            sql: resolvedSql,
-            dbTableName
-          }
+          data
         };
       } catch (error) {
         return {
