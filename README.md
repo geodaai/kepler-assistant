@@ -1,9 +1,42 @@
 # kepler-assistant
 
-The **kepler.gl AI assistant** — the analysis MCP services (`data.*`, `geoda.*`,
+The **kepler.gl AI assistant** — the analysis engines (`data.*`, `geoda.*`,
 `geo.*`, `chart.*`) + agent loop + the kepler-agnostic `ChatToolSurface`,
 composing the kepler-mcp **map contract** so one assistant exposes both the map
 surface and the compute engines.
+
+Those are plain in-process tools, not MCP services. When the assistant runs
+inside the kepler.gl demo-app there is no MCP server in the loop: the app
+imports the browser-safe `engine` and `chat` subpaths and wires its kepler
+command registry in as the `ChatToolSurface`. MCP is an optional transport —
+`src/assistant-server.ts` wraps the same tools for serving over stdio/HTTP
+(`dist/cli.js`).
+
+```
+   kepler.gl demo-app                  MCP server mode
+   ┌─────────────────────────────┐    ┌─────────────────────────────┐
+   │  chat UI + agent loop       │    │  any MCP client / agent     │
+   │  (in-browser)               │    │  (IDE, server, CLI)         │
+   └──────────────┬──────────────┘    └──────────────┬──────────────┘
+                  │                                 │
+                  │  in-process,                    │  stdio / HTTP
+                  │  no MCP, no IPC                 │
+                  ▼                                 ▼
+   ┌───────────────────────────────────────────────────────────────┐
+   │                     kepler-assistant                          │
+   │                                                                │
+   │   ChatToolSurface ── listTools() / invoke()                    │
+   │     ├── data.*   DuckDB tables, SQL                            │
+   │     ├── geoda.*  @geoda WASM: weights, LISA, cluster, ...     │
+   │     ├── geo.*    DuckDB spatial: buffer, join, centroid, ...  │
+   │     └── chart.*  ECharts / chart renderings                    │
+   │                                                                │
+   │   agent loop · bundled skills (kepler, geoda-analysis, ...)   │
+   └───────────────────────────────────────────────────────────────┘
+```
+
+Both entry points talk to the *same* in-process assistant — the demo-app over a
+direct `ChatToolSurface`, server mode over the MCP transport wrapping it.
 
 > **Temporary integration:** the map surface (`@kepler.gl/mcp`'s `map.*` commands
 > + `skill/kepler`) is **vendored at `src/mcp/`** so this repo is self-contained

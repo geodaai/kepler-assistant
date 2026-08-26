@@ -22,6 +22,12 @@ interface Row {
 /** A canned dataset the mock returns for column reads. */
 const SAMPLE: Row[] = [{_v: 10}, {_v: 10}, {_v: 20}, {_v: 20}];
 
+/** Binary 0/1 columns for the colocation (local join count) tests. */
+const BINARY_COLUMNS: Record<string, Row[]> = {
+  binFlag: [{_v: 1}, {_v: 1}, {_v: 0}, {_v: 0}],
+  binFlagB: [{_v: 0}, {_v: 0}, {_v: 1}, {_v: 1}]
+};
+
 export function createMockConnector() {
   const recorded: string[] = [];
   return {
@@ -29,9 +35,16 @@ export function createMockConnector() {
      
     async query(sql: string): Promise<any> {
       recorded.push(sql);
-      // chart.histogram selects `<col> AS _v`; return the sample numbers so the
-      // engine computes a real histogram. Everything else returns a small table.
-      if (/_v/.test(sql)) return tableFromJSON(SAMPLE);
+      // chart.histogram / columnValues select `<col> AS _v`; return the sample
+      // numbers so the engine computes real statistics. Binary columns (for the
+      // colocation / local join count tests) return their 0/1 fixture. Everything
+      // else returns a small table.
+      if (/_v/.test(sql)) {
+        for (const [column, rows] of Object.entries(BINARY_COLUMNS)) {
+          if (sql.includes(`"${column}"`)) return tableFromJSON(rows);
+        }
+        return tableFromJSON(SAMPLE);
+      }
       return tableFromJSON([{ok: true, sql: sql.slice(0, 40)}]);
     },
     async close(): Promise<void> {},

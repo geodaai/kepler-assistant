@@ -1,6 +1,6 @@
 {
   "name": "@openassistant/kepler-assistant",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The kepler.gl AI assistant: the analysis engines (data.*, geoda.*, geo.*, chart.*) + agent loop + the kepler-agnostic ChatToolSurface. TEMPORARILY vendors the @kepler.gl/mcp map surface at src/mcp/ (single-repo prototyping); see NEXT_PLAN.md for the permanent separation.",
   "license": "MIT",
   "type": "module",
@@ -41,9 +41,9 @@
   "packageManager": "pnpm@11.1.2",
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.18",
-    "@geoda/core": "^0.0.22",
-    "@geoda/lisa": "^0.0.22",
-    "@geoda/regression": "^0.0.22",
+    "@geoda/core": "^0.0.25",
+    "@geoda/lisa": "^0.0.25",
+    "@geoda/regression": "^0.0.25",
     "@kepler.gl/actions": "^3.2.0",
     "@kepler.gl/components": "^3.2.0",
     "@kepler.gl/constants": "^3.2.0",

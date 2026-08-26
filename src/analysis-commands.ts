@@ -37,7 +37,13 @@ import {
   spatialLagRegression as geodaSpatialLagRegression,
   spatialError as geodaSpatialErrorRegression
 } from '@geoda/regression';
-import {localMoran as geodaLocalMoran, localGeary as geodaLocalGeary, spatialLag as geodaSpatialLag} from '@geoda/lisa';
+import {
+  localMoran as geodaLocalMoran,
+  localGeary as geodaLocalGeary,
+  spatialLag as geodaSpatialLag,
+  localJoinCount as geodaLocalJoinCount,
+  localBiJoinCount as geodaLocalBiJoinCount
+} from '@geoda/lisa';
 import type {ToolResult} from './types';
 import type {KeplerBridge} from './kepler-bridge';
 import {
@@ -358,6 +364,7 @@ export class AnalysisEngine {
     if (analysis === 'regression') return this.geodaRegression(args);
     if (analysis === 'lisa') return this.geodaLisa(args);
     if (analysis === 'global-moran') return this.geodaGlobalMoran(args);
+    if (analysis === 'colocation') return this.geodaColocation(args);
     if (analysis === 'standardize') return this.geodaStandardize(args);
     if (analysis === 'rate') return this.geodaRate(args);
     if (analysis === 'thiessen-polygons') return this.geodaThiessen(args);
@@ -690,6 +697,50 @@ export class AnalysisEngine {
         variableName,
         totalObservations: n,
         details: `Global Moran's I is ${slope.toFixed(4)} for ${variableName}.`
+      }
+    };
+  }
+
+  private async geodaColocation(args: Record<string, any>): Promise<ToolResult> {
+    const {datasetName, variableName, variableB, weights, permutation = 999, significanceThreshold = 0.05} =
+      args;
+    if (!datasetName || !variableName || !Array.isArray(weights)) {
+      return {
+        success: false,
+        error: 'geoda.analysis colocation requires {datasetName, variableName, weights} (weights = neighbor list)'
+      };
+    }
+    // Local Join Count is a binary (0/1) statistic: `variableB` omitted → the
+    // univariate colocation count; `variableB` present → the bivariate
+    // no-colocation count (the two variables must never both be 1).
+    const a = await this.columnValues(datasetName, variableName);
+    const opts = {neighbors: weights, permutation, significanceCutoff: significanceThreshold};
+    let result: Record<string, any>;
+    if (variableB) {
+      const b = await this.columnValues(datasetName, variableB);
+      result = await geodaLocalBiJoinCount({data: [a, b], ...opts});
+    } else {
+      result = await geodaLocalJoinCount({data: a, ...opts});
+    }
+    const labels = result.labels as string[];
+    const clusterColorAndLabels = labels.map((label, i) => ({
+      value: i,
+      label,
+      color: (result.colors as string[])[i],
+      numberOfObservations: (result.clusters as number[]).filter(c => c === i).length
+    }));
+    const variables = variableB ? [variableName, variableB] : [variableName];
+    return {
+      success: true,
+      data: {
+        type: variableB ? 'bivariate-local-joincount' : 'univariate-local-joincount',
+        variables,
+        clusterColorAndLabels,
+        totalObservations: a.length,
+        details: `Local join count (${variables.join(' & ')}) completed. ${clusterColorAndLabels
+          .filter(c => c.numberOfObservations > 0)
+          .map(c => `${c.label}: ${c.numberOfObservations}`)
+          .join(', ')}`
       }
     };
   }

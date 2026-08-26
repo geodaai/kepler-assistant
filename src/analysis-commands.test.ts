@@ -127,6 +127,42 @@ describe('AnalysisEngine', () => {
     expect(data.totalObservations).toBe(4);
   });
 
+  it('geoda.analysis colocation (univariate local join count)', async () => {
+    const analysis = makeEngine();
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'colocation', datasetName: 'bins', variableName: 'binFlag',
+      weights: NEIGHBORS, permutation: 99
+    });
+    const data = res.data as {type?: string; variables?: string[]; clusterColorAndLabels?: unknown[]; totalObservations?: number};
+    expect(res.success).toBe(true);
+    expect(data.type).toBe('univariate-local-joincount');
+    expect(data.variables).toEqual(['binFlag']);
+    expect(Array.isArray(data.clusterColorAndLabels)).toBe(true);
+    expect(data.totalObservations).toBe(4);
+  });
+
+  it('geoda.analysis colocation bivariate (no-colocation) local join count', async () => {
+    const analysis = makeEngine();
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'colocation', datasetName: 'bins', variableName: 'binFlag',
+      variableB: 'binFlagB', weights: NEIGHBORS, permutation: 99
+    });
+    const data = res.data as {type?: string; variables?: string[]};
+    expect(res.success).toBe(true);
+    expect(data.type).toBe('bivariate-local-joincount');
+    expect(data.variables).toEqual(['binFlag', 'binFlagB']);
+  });
+
+  it('geoda.analysis colocation rejects non-binary input', async () => {
+    const analysis = makeEngine();
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'colocation', datasetName: 'sales', variableName: 'amount',
+      weights: NEIGHBORS, permutation: 99
+    });
+    expect(res.success).toBe(false);
+    expect((res.error ?? '').toLowerCase()).toContain('binary');
+  });
+
   it('geoda.analysis spatial-weights (queen)', async () => {
     const analysis = makeEngine();
     const res = await analysis.invoke('geoda.analysis', {

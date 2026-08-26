@@ -35,6 +35,11 @@ declare module '@geoda/lisa' {
   export function localMoran(props: any): Promise<any>;
   export function localGeary(props: any): Promise<any>;
   export function spatialLag(values: any, weights: any): Promise<any>;
+  // Local Join Count — univariate colocation (`data: number[]`) and bivariate
+  // no-colocation (`data: number[][]`). Result carries `clusters`, `pValues`,
+  // `labels`, `colors`, `lisaValues`.
+  export function localJoinCount(props: {data: number[]; neighbors: number[][]; permutation?: number; significanceCutoff?: number; seed?: number}): Promise<any>;
+  export function localBiJoinCount(props: {data: number[][]; neighbors: number[][]; permutation?: number; significanceCutoff?: number; seed?: number}): Promise<any>;
 }
 
 declare module '@geoda/regression' {
