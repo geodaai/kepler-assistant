@@ -33,7 +33,12 @@ import {
 } from '../glue/utils';
 
 export const QueryToolParameters = z.object({
-  type: z.literal('query'),
+  // The `type` field is a discriminator the model sometimes hallucinates as
+  // `"sql"` (the tool is named `query`). It is never read by `execute`, so
+  // tolerate both spellings rather than failing the whole tool call with the
+  // framework's generic "An error occurred." — which gives the model nothing
+  // to self-correct from.
+  type: z.union([z.literal('query'), z.literal('sql')]),
   sqlQuery: z.string(),
   reasoning: z.string()
 });

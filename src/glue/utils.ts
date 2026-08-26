@@ -601,6 +601,28 @@ export async function ensureKeplerDatasetsMaterialized(
 
     try {
       const dbTableName = datasetNameToTableName(label);
+      // If the table already exists, leave it alone. The bridge's
+      // `materializeDataset` may have materialized this dataset in the GeoJSON
+      // flavor (a `geometry` column + one column per raw feature property) and
+      // created a view under the dataset's verbatim name bound to that schema.
+      // Recreating the table from kepler's field columns changes the schema
+      // (geometry → `_geojson`, and kepler's field list can differ from the raw
+      // properties), which leaves the view's stored column aliases stale and
+      // every `SELECT ... FROM "<dataset name>"` fails with
+      // "Binder Error: table "unnamed_subquery" has N columns available but M
+      // columns specified". The bridge re-materializes on demand, so a table
+      // that already exists is fresh enough for the query tool.
+      const exists = await db.query(
+        `SELECT 1 FROM information_schema.tables
+         WHERE table_name = '${dbTableName.replace(/'/g, "''")}'
+           AND table_type = 'BASE TABLE'
+         LIMIT 1`
+      );
+      if (exists.toArray().length > 0) {
+        materializedDatasetLabels.add(label);
+        continue;
+      }
+
       const variableNames = dataset.fields.map(f => f.name);
       if (variableNames.length === 0) continue;
 
@@ -609,7 +631,6 @@ export async function ensureKeplerDatasetsMaterialized(
         columnData[varName] = getValuesFromDataset(datasets, layers, label, varName);
       }
       const arrowTable = tableFromArrays(columnData);
-      await db.execute(`DROP TABLE IF EXISTS "${dbTableName}"`);
       await db.loadArrow(arrowTable, dbTableName);
       materializedDatasetLabels.add(label);
     } catch (err) {

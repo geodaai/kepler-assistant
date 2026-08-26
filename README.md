@@ -35,6 +35,53 @@ command registry in as the `ChatToolSurface`. MCP is an optional transport —
    └───────────────────────────────────────────────────────────────┘
 ```
 
+Zooming into the kepler-assistant box, the components wire together like this:
+
+```
+   ┌──────────────────────────────────────────────────────────────┐
+   │                 kepler-assistant (internal)                  │
+   │                                                              │
+   │   ┌──────────────────────┐   ┌────────────────────────────┐  │
+   │   │ chat harness         │   │ agent loop                 │  │
+   │   │ (src/chat/)          │   │ (src/agent.ts)             │  │
+   │   │ skills runtime ·     │   │ Planner → ToolRunner       │  │
+   │   │ seed skills · config │   │ plan → execute → render    │  │
+   │   └──────────┬───────────┘   └─────────────┬──────────────┘  │
+   │              │  listTools() / invoke()     │                 │
+   │              ▼                             ▼                 │
+   │   ┌───────────────────────────────────────────────────────┐  │
+   │   │  ChatToolSurface  (src/tool-surface.ts)               │  │
+   │   │  └─ createChatToolSurface (src/chat-surface.ts)       │  │
+   │   └───────────────────┬───────────────────────────────────┘  │
+   │                      │                                       │
+   │              ┌───────┴───────────────────────┐               │
+   │              ▼                             ▼                 │
+   │   ┌──────────────────────┐   ┌────────────────────────────┐  │
+   │   │ map.* tools          │   │ AnalysisEngine             │  │
+   │   │ (src/mcp/ — vendored │   │ (src/analysis-commands.ts) │  │
+   │   │ @kepler.gl/mcp)      │   │ data.* · chart.*           │  │
+   │   │ └ skill/kepler       │   │ geoda.* · geo.*            │  │
+   │   │                      │   │ └─ DuckDbEngine            │  │
+   │   │                      │   │    (src/duckdb-engine.ts)  │  │
+   │   │                      │   │    └ connector: duckdb-    │  │
+   │   │                      │   │      wasm / native         │  │
+   │   │                      │   │    └ @geoda WASM · turf ·  │  │
+   │   │                      │   │      geo-providers         │  │
+   │   └──────────┬───────────┘   └─────────────┬──────────────┘  │
+   │              │  KeplerContext seam         │  KeplerBridge   │
+   │              ▼                             ▼                 │
+   │   ┌───────────────────────────────────────────────────────┐  │
+   │   │ glue (src/glue/) — the only @kepler.gl/* importer;    │  │
+   │   │ implements KeplerContext + analysis glue              │  │
+   │   └───────────────────┬───────────────────────────────────┘  │
+   │                      │                                       │
+   │                      ▼                                       │
+   │   ┌───────────────────────────────────────────────────────┐  │
+   │   │ kepler.gl app (host) — datasets, layers, map state    │  │
+   │   └───────────────────────────────────────────────────────┘  │
+   └──────────────────────────────────────────────────────────────┘
+```
+
 Both entry points talk to the *same* in-process assistant — the demo-app over a
 direct `ChatToolSurface`, server mode over the MCP transport wrapping it.
 
@@ -76,6 +123,134 @@ direct `ChatToolSurface`, server mode over the MCP transport wrapping it.
 - `src/assistant-server.ts` — `buildAssistantMcpServer` composes kepler-mcp's
   `map.*` with the analysis tools on one MCP server; `cli.ts` runs it over
   stdio/HTTP.
+
+## Directory layout
+
+The same layout, by directory:
+
+| Directory | What it does |
+| --- | --- |
+| `src/chat/` | The **kepler-agnostic chat harness** that consumes `ChatToolSurface`: the skills runtime (`executeApi`, `runSkill`, `discoverSkill`, skill storage, model resolution, prompt building), the shared AI-settings config, and the default kepler-flavored seed-skill bundle. Browser-safe `chat` subpath. |
+| `src/commands/` | The full command catalog (`getAllCommands`): kepler `map.*` (from `../mcp`), query `data.*`, geo `geo.*`, `geoda.analysis`, chart `chart.*`, and `data.run-sql`. The analysis shims delegate compute to the shared `AnalysisEngine`. |
+| `src/analysis/` | Demo-app integration: lazily builds the `AnalysisEngine` against the shared duckdb-wasm connector and wires it to the app through `createKeplerBridge` (`getAnalysisEngine`, `runAnalysis`, `runSql`). |
+| `src/glue/` | The kepler-bound glue. Implements the `KeplerContext` glue methods (`getValuesFromDataset`, `loadTableToKepler`, `getConnector`, …) and the analysis glue (`saveToDuckdb`, `getGeometriesFromDataset`, `highlightRows`, …). The only layer that imports `@kepler.gl/*` runtime packages. |
+| `src/mcp/` | The **vendored** `@kepler.gl/mcp` map surface: the map contract, `map.*` commands, `skill/kepler`, and `createRegistryChatSurface` (wraps the room-store command registry as a `ChatToolSurface`). |
+| `src/tools/` | AI SDK tool factories agents call directly (e.g. `query`) plus the ECharts renderers that draw `chart.*` results. |
+| `src/charts/` | Chart components: the ECharts histogram component, its option builder, and the shared theme. |
+| `src/components/` | `MainView` — the React view that hosts the chat harness with the hoisted ECharts renderers. |
+| `src/map/` | kepler map controls: the `ai-assistant` control button (opens the assistant panel) and its `AiStar` icon. |
+| `skills/built-in/` | The repo-owned seed skills (`charts`, `colocation`, `spatial-filter`, `us-boundaries`); `kepler` and `geoda-analysis` come from elsewhere (see Skills). |
+| `scripts/` | Build + verification: `generate-skills.mjs` (bundles the seed skills) and the `verify-*.mjs` scripts (engine, agent, surface, bridge, live demo-app). |
+| `dist/` | `pnpm build` output — the browser-safe `engine` / `chat` subpaths plus the Node CLI. |
+
+## Request flows
+
+Two end-to-end walkthroughs through the kepler.gl demo-app — how a prompt
+travels from the chat UI through the same `ChatToolSurface` contract, then
+diverges: a **map** request actuates kepler.gl directly, while a **chart**
+request round-trips through the analysis engine for compute and is rendered
+back into the chat.
+
+### Map prompt — "add a point layer of taxi pickups"
+
+```
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ① demo-app chat UI (MainView) — user prompt                    │
+   │    "Add a point layer of taxi pickups"                         │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  user prompt
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ② chat harness (src/chat/) — orchestrator agent                │
+   │    decides → runSkill("kepler")                                │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  runSkill("kepler") — sub-agent seeded with SKILL.md
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ③ skill sub-agent (runSkillTool.ts) — toolset: executeApi      │
+   │    executeApi({commandId: "map.add-layer",                     │
+   │                input: {datasetName, layerType: "point", ...}}) │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  surface.invoke(commandId, input)
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ④ ChatToolSurface — createRegistryChatSurface(roomStore)       │
+   │    (src/mcp/chat-surface.ts) → registry invokeCommand          │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  map.add-layer command
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ⑤ map.add-layer RoomCommand (src/mcp/commands/)                │
+   │    builds the layer; ctx.dispatch(addLayerAction, fitBounds)   │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  kepler Redux actions
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ⑥ KeplerContext (src/store.ts getKeplerContext)                │
+   │    dispatch → reduxStore.dispatch(action) · glue (src/glue/)   │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  addLayer + fitBounds
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ⑦ kepler.gl app — visState updates                             │
+   │    map re-renders with the new layer                           │
+   └────────────────────────────────────────────────────────────────┘
+```
+
+### Histogram prompt — "show a histogram of fare amounts"
+
+```
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ① demo-app chat UI (MainView) — user prompt                    │
+   │    "Show a histogram of fare amounts"                          │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  user prompt
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ② chat harness (src/chat/) — orchestrator agent                │
+   │    calls executeApi directly                                   │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  executeApi({commandId: "chart.histogram", ...})
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ③ executeApi tool (src/chat/executeApi/)                       │
+   │    commandId: "chart.histogram"                                │
+   │    input: {datasetName, variableName, numberOfBins}            │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  surface.invoke(commandId, input)
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ④ ChatToolSurface — createRegistryChatSurface(roomStore)       │
+   │    (src/mcp/chat-surface.ts) → registry invokeCommand          │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  chart.histogram command
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ⑤ chart.histogram shim (src/commands/chart-commands.ts)        │
+   │    → runAnalysis("chart.histogram", {table, column, bins})     │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  runAnalysis
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ⑥ AnalysisEngine (src/analysis/index.ts) — lazily built        │
+   │    new AnalysisEngine(getConnector(), createKeplerBridge(ctx)) │
+   │    materializes the kepler dataset into DuckDB                 │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  SQL over the materialized table
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ⑦ DuckDbEngine (src/duckdb-engine.ts) — bin SQL                │
+   │    returns histogramData + barDataIndexes + details            │
+   └────────────────────────────────────────────────────────────────┘
+   │                                │  result (data.__ui)
+   │                                ▼
+   ┌────────────────────────────────────────────────────────────────┐
+   │ ⑧ ECharts renderer (src/tools/echarts-renderers.tsx)           │
+   │    dispatches on commandId === "chart.histogram"               │
+   │    → HistogramComponent drawn inline in the chat UI            │
+   │    brush-selection → highlightRows → map highlighting          │
+   └────────────────────────────────────────────────────────────────┘
+```
 
 ## Skills
 
