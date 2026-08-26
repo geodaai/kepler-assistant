@@ -81,9 +81,36 @@ describe('AnalysisEngine', () => {
   it('chart.boxplot computes median and IQR', async () => {
     const analysis = makeEngine();
     const res = await analysis.invoke('chart.boxplot', {table: 'sales', variableNames: ['amount']});
-    const box = (res.data as {boxplots?: Array<{median?: number; iqr?: number}>}).boxplots?.[0];
+    const data = res.data as {
+      boxplots?: Array<{median?: number; iqr?: number}>;
+      __ui?: {
+        boxplotData?: {
+          boxplots?: Array<{
+            name?: string;
+            low?: number;
+            q1?: number;
+            q2?: number;
+            q3?: number;
+            high?: number;
+            mean?: number;
+          }>;
+          meanPoint?: [string, number][];
+        };
+        rawData?: Record<string, number[]>;
+        rawDataIndices?: Record<string, number[]>;
+      };
+    };
+    const box = data.boxplots?.[0];
     expect(box?.median).toBe(15);
     expect(box?.iqr).toBe(10);
+
+    // Renderer-only payload under `__ui`: whisker-fence box, mean marker, and
+    // raw values with their dataset row indexes for brush-selection.
+    const chartBox = data.__ui?.boxplotData?.boxplots?.[0];
+    expect(chartBox).toMatchObject({name: 'amount', low: -5, q1: 10, q2: 15, q3: 20, high: 35, mean: 15});
+    expect(data.__ui?.boxplotData?.meanPoint).toEqual([['amount', 15]]);
+    expect(data.__ui?.rawData).toEqual({amount: [10, 10, 20, 20]});
+    expect(data.__ui?.rawDataIndices).toEqual({amount: [0, 1, 2, 3]});
   });
 
   it('chart.pcp computes per-column stats', async () => {

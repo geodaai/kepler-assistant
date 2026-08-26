@@ -29,7 +29,7 @@ description for the envelope shape.
 | commandId           | what it produces                                   | chart? |
 | ------------------- | -------------------------------------------------- | :----: |
 | `chart.histogram`   | frequency distribution of one numeric variable     |  yes   |
-| `chart.boxplot`     | quartile/mean/std/IQR stats for several variables  |  no   |
+| `chart.boxplot`     | box-and-whisker plot for several variables         |  yes   |
 | `chart.scatterplot` | correlation + min/max/mean for two variables       |  no   |
 | `chart.bubble`      | x/y/size stats for three variables                 |  no   |
 | `chart.pcp`         | min/max/mean/std per variable, many at once        |  no   |
@@ -52,11 +52,13 @@ rather than guessing.
 
 ## Honesty rule
 
-- `chart.histogram` **draws a chart**, so do NOT restate every bin count in
-  prose — a short summary of the shape is enough.
-- The other four return **numbers only, no chart**. Their statistics MUST
-  appear in your reply, and you MUST NOT claim a chart was drawn. If you only
-  see numbers back from a command, the user sees only your text.
+- `chart.histogram` and `chart.boxplot` **draw a chart**, so do NOT restate the
+  chart's contents in prose — a short summary of the shape is enough (for the
+  boxplot, describe skew/spread/outliers, don't re-list every quartile).
+- The other three (`chart.scatterplot`, `chart.bubble`, `chart.pcp`) return
+  **numbers only, no chart**. Their statistics MUST appear in your reply, and
+  you MUST NOT claim a chart was drawn. If you only see numbers back from a
+  command, the user sees only your text.
 
 ## Workflow
 
@@ -68,8 +70,11 @@ rather than guessing.
 4. Report the results in prose:
    - For `chart.histogram`, describe the distribution shape (skew, modes,
      range) — the chart itself shows the bin counts.
-   - For the four stats-only commands, restate the returned numbers (medians,
-     IQRs, correlation, means, etc.) since no chart is rendered.
+   - For `chart.boxplot`, describe the shape (skew, spread, outliers) — the
+     chart shows the boxes, whiskers, raw points, and means.
+   - For the three stats-only commands (`chart.scatterplot`, `chart.bubble`,
+     `chart.pcp`), restate the returned numbers (correlation, means, etc.)
+     since no chart is rendered.
 
 ### Example: histogram
 
@@ -111,9 +116,9 @@ rather than guessing.
 
 ## Self-check (before your final message)
 
-- If you called any command other than `chart.histogram`, your reply must
-  contain its numeric results. If it doesn't, add them.
-- If you called `chart.histogram`, do not list every bin count; the chart
-  already shows them.
-- Never claim a chart was drawn for `chart.boxplot`, `chart.scatterplot`,
-  `chart.bubble`, or `chart.pcp` — they return numbers only.
+- If you called `chart.scatterplot`, `chart.bubble`, or `chart.pcp`, your reply
+  must contain their numeric results. If it doesn't, add them.
+- If you called `chart.histogram` or `chart.boxplot`, do not re-state the
+  chart's contents in prose; a short shape summary is enough.
+- Never claim a chart was drawn for `chart.scatterplot`, `chart.bubble`, or
+  `chart.pcp` — they return numbers only.

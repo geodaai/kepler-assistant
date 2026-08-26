@@ -98,11 +98,11 @@ export const EXECUTE_API_GUIDANCE = `Always call as: { call: { apiName: "<name>"
 
   CHART commands (analytical charts & summary statistics):
   - "chart.histogram": Frequency distribution of one numeric variable. DRAWS a chart inline. input: { datasetName, variableName, numberOfBins? }. Default bins: 7. Returns bin counts + details string.
-  - "chart.boxplot": Quartile/mean/std/IQR stats for several variables. Numbers only, NO chart. input: { datasetName, variableNames: string[] }.
+  - "chart.boxplot": Box-and-whisker chart for one or more numeric variables. DRAWS a chart inline (box, whiskers, raw points, mean marker). input: { datasetName, variableNames: string[], boundIQR? }. boundIQR: whisker fence multiplier (default 1.5). Summarize the quartiles/spread in your reply — do NOT restate every quartile as a table.
   - "chart.scatterplot": Correlation + min/max/mean for two variables. Numbers only, NO chart. input: { datasetName, xVariableName, yVariableName }.
   - "chart.bubble": x/y/size stats for three variables. Numbers only, NO chart. input: { datasetName, xVariableName, yVariableName, sizeVariableName }.
   - "chart.pcp": min/max/mean/std per variable, many at once. Numbers only, NO chart. input: { datasetName, variableNames: string[] }.
-  Only "chart.histogram" draws a chart; the other four return numbers only — restate the statistics in your reply and do NOT claim a chart was drawn.
+  Only "chart.histogram" and "chart.boxplot" draw a chart inline; scatterplot/bubble/pcp return numbers only — restate the statistics in your reply and do NOT claim a chart was drawn for them.
 
   Reference geography: US state/county/zipcode boundaries are fetched via geo.us-boundary (public GitHub datasets); road networks via geo.roads (OpenStreetMap Overpass). Building footprints and POIs are NOT fetched by a built-in command — the user loads such data into kepler.gl via map.load-data (a URL) or by importing files directly. If a task needs data the user has not provided, ask the user to load it first.`;
 
@@ -204,8 +204,9 @@ export function createExecuteApiTool(surface: ChatToolSurface) {
       if (output.integerTemporalHint != null)
         modelResult.integerTemporalHint = output.integerTemporalHint;
       // Chart command outputs. `barDataIndexes`, `histogramData` (raw bins),
-      // `source`, `meanPoint` are renderer-only and intentionally NOT surfaced
-      // — the `details` string already carries the human/model-facing summary.
+      // `source`, and the boxplot renderer payload (`boxplotData`, `rawData`,
+      // `rawDataIndices`) are renderer-only and intentionally NOT surfaced —
+      // the `details` string already carries the human/model-facing summary.
       if (output.commandId != null) modelResult.commandId = output.commandId;
       if (output.variableNames != null) modelResult.variableNames = output.variableNames;
       if (output.xVariableName != null) modelResult.xVariableName = output.xVariableName;

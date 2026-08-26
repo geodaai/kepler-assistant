@@ -31,7 +31,7 @@ import {
   getModel
 } from './chat';
 import {createKeplerAiInstructions} from './instructions';
-import {getEchartsToolRenderers, setHistogramSelectionHandler} from './tools/echarts-renderers';
+import {getEchartsToolRenderers, setChartSelectionHandler} from './tools/echarts-renderers';
 import {
   highlightRows,
   setStoreConnectorProvider,
@@ -70,10 +70,11 @@ export function setReduxStore(store: any) {
   if (typeof window !== 'undefined') {
     (window as any).__keplerReduxStore = store;
   }
-  // Wire the histogram brush-selection callback now that redux is available, so
-  // the standalone chart renderer can highlight the brushed rows on the map.
-  // The histogram renderer surfaces tool output produced by skill sub-agents.
-  setHistogramSelectionHandler((datasetName, selectedIndices) => {
+  // Wire the chart brush-selection callback now that redux is available, so the
+  // standalone chart renderers (histogram + boxplot) can highlight the brushed
+  // rows on the map. The chart renderers surface tool output produced by skill
+  // sub-agents.
+  setChartSelectionHandler((datasetName, selectedIndices) => {
     const visState = keplerStateAccessors?.getVisState();
     if (!visState) return;
     highlightRows(

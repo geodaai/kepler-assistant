@@ -8,12 +8,13 @@
  * execution to the engine and re-mapping the engine's `table`/`column` naming
  * back to the app's `datasetName`/`variableName` contract.
  *
- * The histogram renderer is dispatched by `commandId` rather than tool name —
- * see `tools/echarts-renderers.tsx` (`getEchartsToolRenderers` registers an
- * `executeApi` renderer that checks `output.commandId === 'chart.histogram'`).
- * The engine returns the renderer-only payload (`histogramData`, `barDataIndexes`,
- * `source`) under `data.__ui` so an MCP adapter can strip it; `barDataIndexes`
- * survives through `result.data` so the renderer can use it for brush-selection
+ * The chart renderers are dispatched by `commandId` rather than tool name — see
+ * `tools/echarts-renderers.tsx` (`getEchartsToolRenderers` registers an
+ * `executeApi` renderer that checks `output.commandId` for `chart.histogram`
+ * and `chart.boxplot`). The engine returns the renderer-only payloads
+ * (`histogramData`/`barDataIndexes`/`boxplotData`/`rawData`/`rawDataIndices`/
+ * `source`) under `data.__ui` so an MCP adapter can strip them; the indexes
+ * survive through `result.data` so the renderer can use them for brush-selection
  * → map highlighting.
  */
 
@@ -102,10 +103,18 @@ export function getChartCommands(): Record<string, RoomCommand> {
       datasetName: z.string().describe('The name of the dataset'),
       variableNames: z
         .array(z.string())
-        .describe('The names of the numeric variables to create boxplots for')
+        .describe('The names of the numeric variables to create boxplots for'),
+      boundIQR: z
+        .number()
+        .optional()
+        .describe('Whisker fence multiplier (whiskers at q1 - boundIQR*iqr / q3 + boundIQR*iqr). Default is 1.5.')
     }),
     'chart.boxplot',
-    ({datasetName, variableNames}) => ({table: datasetName, variableNames}),
+    ({datasetName, variableNames, boundIQR}) => ({
+      table: datasetName,
+      variableNames,
+      boundIQR
+    }),
     d => ({
       datasetName: d.table,
       variables: d.variables,

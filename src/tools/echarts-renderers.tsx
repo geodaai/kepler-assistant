@@ -1,7 +1,9 @@
 import React from 'react';
 import type {ToolRenderer, ToolRendererRegistry} from '@sqlrooms/ai-core';
 import type {ExecuteApiOutput} from '../chat';
+import {BoxplotComponent} from '../charts/boxplot-component';
 import {HistogramComponent} from '../charts/histogram-component';
+import type {BoxplotBox, BoxplotDataProps} from '../charts/boxplot-option';
 
 /**
  * Histogram output types consumed by the renderer. The chart compute itself
@@ -48,17 +50,37 @@ export type HistogramUiPayload = {
   source?: 'kepler' | 'duckdb';
 };
 
+export type BoxplotToolOutput = {
+  success: boolean;
+  datasetName: string;
+  variableNames?: string[];
+  details?: string;
+  error?: string;
+};
+
 /**
- * Bridge for the histogram brush-selection callback. The tool renderer is a
- * standalone component in the registry and has no access to the kepler context,
- * so the store registers a handler here that highlights the selected rows.
+ * Renderer-only payload for the `chart.boxplot` command, carried under
+ * `data.__ui` (not surfaced to the model, stripped by MCP adapters).
  */
-type HistogramSelectionHandler = (datasetName: string, selectedIndices: number[]) => void;
+export type BoxplotUiPayload = {
+  boxplotData: BoxplotDataProps;
+  rawData: Record<string, number[]>;
+  rawDataIndices?: Record<string, number[]>;
+  source?: 'kepler' | 'duckdb';
+};
 
-let histogramSelectionHandler: HistogramSelectionHandler | undefined;
+/**
+ * Bridge for the chart brush-selection callbacks (histogram + boxplot). The
+ * tool renderers are standalone components in the registry and have no access
+ * to the kepler context, so the store registers a handler here that highlights
+ * the selected rows.
+ */
+type ChartSelectionHandler = (datasetName: string, selectedIndices: number[]) => void;
 
-export function setHistogramSelectionHandler(handler: HistogramSelectionHandler | undefined) {
-  histogramSelectionHandler = handler;
+let chartSelectionHandler: ChartSelectionHandler | undefined;
+
+export function setChartSelectionHandler(handler: ChartSelectionHandler | undefined) {
+  chartSelectionHandler = handler;
 }
 
 /**
@@ -120,7 +142,7 @@ const HistogramChartRenderer: ToolRenderer<
         onSelected={
           isKepler
             ? (datasetName, selectedIndices) =>
-                histogramSelectionHandler?.(datasetName, selectedIndices)
+                chartSelectionHandler?.(datasetName, selectedIndices)
             : undefined
         }
       />
@@ -134,18 +156,100 @@ const HistogramChartRenderer: ToolRenderer<
 };
 
 /**
+ * Render the boxplot produced by the `chart.boxplot` command.
+ *
+ * Mirrors the histogram renderer: dispatch happens in `EchartsToolRenderer` on
+ * `output.commandId`, and brush-selection is only wired for kepler-sourced rows
+ * (`ui.source !== 'duckdb'`), since DuckDB-only tables have no kepler layer to
+ * highlight.
+ */
+const BoxplotChartRenderer: ToolRenderer<
+  ExecuteApiOutput & BoxplotToolOutput & {__ui?: BoxplotUiPayload}
+> = ({output, state, errorText}) => {
+  if (!output || output.commandId !== 'chart.boxplot') {
+    return null;
+  }
+
+  if (state === 'output-error') {
+    return (
+      <div className="text-destructive text-xs">
+        Boxplot failed: {errorText ?? output.error ?? 'Unknown error'}
+      </div>
+    );
+  }
+
+  if (!output.success) {
+    if (state === 'input-streaming' || state === 'input-available') {
+      return <div className="text-xs opacity-60">Building boxplot…</div>;
+    }
+    return (
+      <div className="text-destructive text-xs">
+        Boxplot failed: {output.error ?? 'No data returned'}
+      </div>
+    );
+  }
+
+  const ui = output.__ui;
+  if (!ui?.boxplotData?.boxplots?.length) {
+    return <div className="text-xs opacity-60">No values to plot.</div>;
+  }
+
+  // Only kepler-sourced rows line up with the map, so brush-selection is only
+  // wired in that case. DuckDB-only tables have no kepler layer to highlight,
+  // so the brush is inert — surface that as a one-line note instead of a
+  // silent dead interaction.
+  const isKepler = ui.source !== 'duckdb';
+
+  return (
+    <div className="my-2 w-full">
+      <BoxplotComponent
+        datasetName={output.datasetName}
+        variables={output.variableNames ?? ui.boxplotData.boxplots.map(b => b.name)}
+        boxplotData={ui.boxplotData}
+        rawData={ui.rawData}
+        rawDataIndices={ui.rawDataIndices}
+        onSelected={
+          isKepler
+            ? (datasetName, selectedIndices) =>
+                chartSelectionHandler?.(datasetName, selectedIndices)
+            : undefined
+        }
+      />
+      {!isKepler && (
+        <div className="mt-1 text-[10px] opacity-60">
+          Data is from a DuckDB-only table; brushing is not linked to the map.
+        </div>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Dispatcher for the echarts tool renderers, registered under the `executeApi`
+ * key. Charts are routed through `executeApi` (the tool name reported to the UI
+ * is always `executeApi`), so it dispatches on `output.commandId`: histogram →
+ * `HistogramChartRenderer`, boxplot → `BoxplotChartRenderer`. Any other
+ * `executeApi` output returns null so the registry falls through to the default
+ * text rendering.
+ */
+const EchartsToolDispatcher: ToolRenderer<any> = props => {
+  if (!props.output) return null;
+  if (props.output.commandId === 'chart.histogram') {
+    return HistogramChartRenderer(props as any);
+  }
+  if (props.output.commandId === 'chart.boxplot') {
+    return BoxplotChartRenderer(props as any);
+  }
+  return null;
+};
+
+/**
  * Renderers for the echarts-style analytical tools, keyed by tool name so they
  * can be spread into the store `toolRenderers` registry.
- *
- * With charts routed through `executeApi`, the tool name reported to the UI is
- * `executeApi`. The histogram renderer dispatches on `output.commandId` to
- * distinguish a histogram result from any other `executeApi` output; for
- * non-histogram output it returns null so the default `executeApi` text
- * rendering applies.
  */
 export function getEchartsToolRenderers(): ToolRendererRegistry {
   return {
-    executeApi: HistogramChartRenderer as ToolRenderer<any>
+    executeApi: EchartsToolDispatcher as ToolRenderer<any>
   };
 }
 

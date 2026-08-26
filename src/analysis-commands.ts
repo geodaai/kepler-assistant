@@ -300,16 +300,38 @@ export class AnalysisEngine {
   }
 
   private async boxplot(args: Record<string, any>): Promise<ToolResult> {
-    const {table, variableNames} = args;
+    const {table, variableNames, boundIQR = 1.5} = args;
     if (!table || !Array.isArray(variableNames) || !variableNames.length) {
       return {success: false, error: 'chart.boxplot requires {table, variableNames}'};
     }
     await this.ensureMaterialized(table);
     const boxplots = [];
+    // Renderer-only raw values per variable plus their kepler row indexes, so
+    // the boxplot component can draw the data points and map brush-selection
+    // back to dataset rows (mirrors the histogram's `barDataIndexes`).
+    const rawData: Record<string, number[]> = {};
+    const rawDataIndices: Record<string, number[]> = {};
     for (const column of variableNames) {
-      const values = await this.columnValues(table, column);
+      const {values, indices} = await this.columnValuesWithIndices(table, column);
+      rawData[column] = values;
+      rawDataIndices[column] = indices;
       boxplots.push({name: column, ...percentileStats(values)});
     }
+    // Renderer-only boxplot series: whiskers at the `boundIQR` fences and the
+    // mean markers, mirroring `@openassistant/plots` createBoxplot +
+    // `@openassistant/echarts` BoxplotComponent. `data.boxplots` above stays the
+    // model-facing five-number summary.
+    const chartBoxplots = boxplots.map(b => ({
+      name: b.name,
+      low: b.q1 - boundIQR * b.iqr,
+      q1: b.q1,
+      q2: b.median,
+      q3: b.q3,
+      high: b.q3 + boundIQR * b.iqr,
+      mean: b.mean,
+      std: b.std,
+      iqr: b.iqr
+    }));
     return {
       success: true,
       data: {
@@ -317,7 +339,15 @@ export class AnalysisEngine {
         variables: variableNames,
         boxplots,
         // renderer-only payload under __ui; MCP strips it
-        __ui: {meanPoint: boxplots.map(b => [b.name, b.mean] as [string, number])}
+        __ui: {
+          boxplotData: {
+            boxplots: chartBoxplots,
+            meanPoint: chartBoxplots.map(b => [b.name, b.mean] as [string, number])
+          },
+          rawData,
+          rawDataIndices,
+          source: this.bridge ? 'kepler' : 'duckdb'
+        }
       }
     };
   }
@@ -1004,6 +1034,28 @@ export class AnalysisEngine {
       `SELECT ${q(column)} AS _v FROM ${q(table)} WHERE ${q(column)} IS NOT NULL`
     );
     return result.rows.map(r => Number(r._v)).filter(v => Number.isFinite(v));
+  }
+
+  /**
+   * Like `columnValues`, but also returns each value's original row index so a
+   * chart renderer can map selected points back to kepler dataset rows. Reads
+   * ALL rows without a WHERE clause (like `histogram`) so the query row index
+   * is the dataset row index — filtering in SQL would shift positions.
+   */
+  private async columnValuesWithIndices(
+    table: string,
+    column: string
+  ): Promise<{values: number[]; indices: number[]}> {
+    const result = await this.db.queryAll(`SELECT ${q(column)} AS _v FROM ${q(table)}`);
+    const values: number[] = [];
+    const indices: number[] = [];
+    result.rows.forEach((r, i) => {
+      const raw = (r as Record<string, unknown>)._v;
+      if (raw === null || raw === undefined || raw === '' || !Number.isFinite(Number(raw))) return;
+      values.push(Number(raw));
+      indices.push(i);
+    });
+    return {values, indices};
   }
 }
 

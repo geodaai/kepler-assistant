@@ -149,8 +149,40 @@ export type ExecuteApiOutput = {
   /** `'kepler'` rows line up with the map (brush highlights features);
    * `'duckdb'` rows don't (brush is inert). Renderer-only. */
   source?: 'kepler' | 'duckdb';
+  /**
+   * Per-variable quartile/mean/std/IQR stats. The model-facing summary for
+   * `chart.boxplot`; the renderer additionally needs the `boxplotData`/
+   * `rawData`/`rawDataIndices` payload under `__ui` to draw the chart.
+   */
   boxplots?: unknown[];
-  meanPoint?: [string, number][];
+  /**
+   * Boxplot renderer payload (whisker-fence boxes + mean markers), carried
+   * under `data.__ui` for `chart.boxplot`. NOT surfaced to the LLM by
+   * `toModelOutput` — the `details` string carries the summary instead.
+   */
+  boxplotData?: {
+    boxplots: Array<{
+      name: string;
+      low: number;
+      q1: number;
+      q2: number;
+      q3: number;
+      high: number;
+      mean: number;
+      std: number;
+      iqr: number;
+    }>;
+    meanPoint: [string, number][];
+  };
+  /** Raw values per variable, drawn as scatter strips by the boxplot renderer.
+   * Renderer-only. */
+  rawData?: Record<string, number[]>;
+  /**
+   * Dataset row index per raw value (`rawDataIndices[var][i]` is the kepler row
+   * for `rawData[var][i]`), used by the boxplot renderer for brush-selection →
+   * map highlighting. Renderer-only.
+   */
+  rawDataIndices?: Record<string, number[]>;
   correlation?: number;
   xStats?: {min: number; max: number; mean: number};
   yStats?: {min: number; max: number; mean: number};
