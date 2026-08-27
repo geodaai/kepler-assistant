@@ -37,9 +37,10 @@ export const EXECUTE_API_TOOL_NAME = 'executeApi' as const;
  * rather than a rationale that references internal machinery.
  */
 const ACTIVITY_REASONING_DESCRIPTION =
-  'A short, user-facing status phrase in plain domain terms describing what is happening, shown ' +
-  'in the activity log (e.g. "Fetching the city boundary", "Building the map layer"). Do NOT ' +
-  'mention skill names/ids, orchestration, sub-agents, or internal tooling.';
+  'REQUIRED — a short, user-facing status phrase in plain domain terms describing what is happening, ' +
+  'shown in the activity log (e.g. "Fetching the city boundary", "Building the map layer"). Do NOT ' +
+  'mention skill names/ids, orchestration, sub-agents, or internal tooling. Never omit this field or ' +
+  'leave it empty.';
 
 /**
  * The model's primary reference for the `executeApi` tool. Lists every
@@ -166,7 +167,10 @@ export function createExecuteApiTool(surface: ChatToolSurface) {
       normalizeExecuteApiInput,
       z.object({
         call: ExecuteApiCall,
-        reasoning: z.string().describe(ACTIVITY_REASONING_DESCRIPTION).optional().default('')
+        reasoning: z
+          .string()
+          .describe(ACTIVITY_REASONING_DESCRIPTION)
+          .min(1, 'reasoning must be a non-empty status phrase')
       })
     ),
     execute: async (

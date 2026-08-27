@@ -58,7 +58,10 @@ export function createRunSkillTool({
     description:
       'Run an installed skill by id. The skill receives the goal as its user prompt and has access to the executeApi tool, which dispatches map/data/geoda/geo/chart commands.',
     inputSchema: z.object({
-      reasoning: z.string().describe('Why this skill is being invoked.'),
+      reasoning: z
+        .string()
+        .describe('Why this skill is being invoked.')
+        .min(1, 'reasoning must be a non-empty status phrase'),
       skillId: z.string().describe('The id of the skill to run, e.g. "colocation".'),
       goal: z
         .string()
