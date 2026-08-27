@@ -48,6 +48,32 @@ describe('AnalysisEngine', () => {
     expect(data.totalRows).toBeGreaterThan(0);
   });
 
+  it('data.query converts Arrow STRUCT rows to plain JSON (no StructRow proxies)', async () => {
+    // DuckDB returns STRUCT columns (e.g. `_geojson`) as Arrow StructRow
+    // proxies whose isExtensible trap violates the proxy invariant — immer
+    // produce on such a value throws `'isExtensible' on proxy: ...`. The
+    // engine must return plain objects so the harness store can persist them.
+    const feature = {
+      type: 'Feature',
+      geometry: {type: 'Polygon', coordinates: [[[0, 0], [1, 1]]]},
+      properties: {NAME: 'NBH0'}
+    };
+    const connector = createMockConnector();
+    connector.query = (async (sql: string) => {
+      if (/information_schema\.tables/.test(sql)) {
+        return tableFromJSON([{table_name: 'tbl_nyc_geojson'}]);
+      }
+      return tableFromJSON([{_geojson: feature, NAME: 'NBH0'}]);
+    }) as any;
+    const analysis = new AnalysisEngine(connector as any);
+    const res = await analysis.invoke('data.query', {sql: 'SELECT * FROM tbl_nyc_geojson'});
+    expect(res.success).toBe(true);
+    const row = (res.data as {firstFiveRows?: Array<Record<string, any>>}).firstFiveRows?.[0];
+    expect(row?._geojson?.constructor?.name).not.toBe('StructRow');
+    expect(() => Object.isExtensible(row?._geojson)).not.toThrow();
+    expect(JSON.parse(JSON.stringify(row))).toEqual({_geojson: feature, NAME: 'NBH0'});
+  });
+
   it('chart.histogram computes real bins from connector values', async () => {
     const analysis = makeEngine();
     const res = await analysis.invoke('chart.histogram', {table: 'sales', column: 'amount', bins: 2});

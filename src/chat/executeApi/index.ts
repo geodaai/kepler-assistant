@@ -107,6 +107,41 @@ export const EXECUTE_API_GUIDANCE = `Always call as: { call: { apiName: "<name>"
   Reference geography: US state/county/zipcode boundaries are fetched via geo.us-boundary (public GitHub datasets); road networks via geo.roads (OpenStreetMap Overpass). Building footprints and POIs are NOT fetched by a built-in command — the user loads such data into kepler.gl via map.load-data (a URL) or by importing files directly. If a task needs data the user has not provided, ask the user to load it first.`;
 
 /**
+ * Deeply convert any Arrow StructRow / Vector proxies a command output may
+ * carry into plain JSON before the output leaves the tool boundary.
+ *
+ * WHY: the harness stores each tool output in an immer-based store
+ * (`updateAgentProgress` → `produce` → autoFreeze). Arrow STRUCT columns read
+ * back from DuckDB surface as `StructRow` proxies whose `isExtensible` trap
+ * violates the JS Proxy invariant, so immer's deep-freeze throws
+ * `'isExtensible' on proxy: trap result does not reflect extensibility of
+ * proxy target (which is 'true')` and the whole skill fails. `toJSON()` on a
+ * StructRow/Vector yields a plain, JSON-safe object — recurse through it here
+ * so NO command output can ever poison the store, regardless of which command
+ * (or future command) forgets to normalize.
+ */
+function toProxySafeOutput(v: unknown): unknown {
+  if (v === null || typeof v !== 'object') return v;
+  if (typeof (v as any).toJSON === 'function') {
+    const json = (v as any).toJSON();
+    if (json !== null && typeof json === 'object') {
+      for (const key of Object.keys(json)) {
+        json[key] = toProxySafeOutput(json[key]);
+      }
+      return json;
+    }
+    return json;
+  }
+  if (Array.isArray(v)) return v.map(toProxySafeOutput);
+  if (typeof v !== 'object') return v;
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(v)) {
+    out[key] = toProxySafeOutput((v as Record<string, unknown>)[key]);
+  }
+  return out;
+}
+
+/**
  * Build the `executeApi` tool parameterized by a `ChatToolSurface`. The command
  * handlers are constructed once per call; they delegate `executeCommand` /
  * `listCommands` to `surface.invoke` / `surface.listTools` (the kepler registry
@@ -145,7 +180,11 @@ export function createExecuteApiTool(surface: ChatToolSurface) {
 
       try {
         const result = await HANDLERS[call.apiName].run(apiCtx);
-        return {...result, apiName: call.apiName};
+        // Normalize before returning: the harness stores this object in an
+        // immer store that deep-freezes it, and a leaked Arrow StructRow proxy
+        // would throw during produce (see `toProxySafeOutput`). Always strip
+        // proxies even if a command's data slipped through un-normalized.
+        return toProxySafeOutput({...result, apiName: call.apiName}) as ExecuteApiOutput;
       } catch (error) {
         return {
           success: false,

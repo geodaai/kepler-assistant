@@ -103,15 +103,40 @@ function sqlLiteral(v: unknown): string {
  * engine rows through Puppeteer) — coerce to String, matching the host's
  * `convertArrowRowToObject` convention. Arrow DECIMAL surfaces as a BigNum
  * wrapper object — coerce to Number via its valueOf.
+ *
+ * Arrow STRUCT columns surface as `StructRow` PROXIES whose `isExtensible`
+ * trap violates the JS Proxy invariant (`return false` against an extensible
+ * target), so `Object.isFrozen` / `Object.isExtensible` / `Object.isSealed` on
+ * one THROWS. Immer's `produce` finalize (used by the AiSlice store to persist
+ * agent tool progress) deep-freezes stored tool output, so a StructRow leaked
+ * into e.g. `data.query`'s `firstFiveRows` makes the whole skill fail with
+ * `'isExtensible' on proxy: trap result does not reflect extensibility of
+ * proxy target`. `toJSON()` on a StructRow/Vector yields a plain, JSON-safe
+ * object (recursively converted here), which is what must be returned instead.
  */
 function toJsonSafe(v: unknown): unknown {
   if (typeof v === 'bigint') return v.toString();
-  if (v !== null && typeof v === 'object' && typeof (v as any).valueOf === 'function') {
-    const name = (v as any).constructor?.name;
-    if (name === 'Decimal' || name === 'DecimalBigNum') {
-      const d = Number(v as any);
-      if (Number.isFinite(d)) return d;
+  if (v !== null && typeof v === 'object') {
+    if (typeof (v as any).valueOf === 'function') {
+      const name = (v as any).constructor?.name;
+      if (name === 'Decimal' || name === 'DecimalBigNum') {
+        const d = Number(v as any);
+        if (Number.isFinite(d)) return d;
+      }
     }
+    // StructRow / Vector proxies (and any other Arrow value with a toJSON)
+    // produce plain nested structures — recursively normalize.
+    if (typeof (v as any).toJSON === 'function') {
+      const json = (v as any).toJSON();
+      if (json !== null && typeof json === 'object') {
+        for (const key of Object.keys(json)) {
+          json[key] = toJsonSafe(json[key]);
+        }
+        return json;
+      }
+      return json;
+    }
+    if (Array.isArray(v)) return v.map(toJsonSafe);
   }
   return v;
 }
