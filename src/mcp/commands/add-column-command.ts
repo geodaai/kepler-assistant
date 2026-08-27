@@ -1,8 +1,8 @@
 import type {RoomCommand} from '@sqlrooms/room-store';
 import {z} from 'zod';
 import {updateDataset} from '@kepler.gl/actions';
-import {arrowSchemaToFields} from '@kepler.gl/processors';
 import {KeplerContext} from './types';
+import {buildDatasetUpdatePayload} from '../../glue/utils';
 import {datasetNameToTableName, arrowTableToObjects, tableToLLMResult} from './utils';
 
 export const addColumnCommandId = 'map.add-column' as const;
@@ -92,18 +92,17 @@ IMPORTANT: this command only ADDS columns. It cannot delete or rename-in-place a
           `SELECT ${selectList} FROM "${dbTableName}"`
         );
 
-        // Build the kepler payload the same way the arrow file loader does:
-        // column vectors + `arrowSchemaToFields` (handles geoarrow / wkb / h3).
-        const cols = [...Array(arrowResult.numCols).keys()].map(i =>
-          arrowResult.getChildAt(i)
+        // Build the kepler payload as plain rows. Passing the raw arrow columns
+        // would round-trip `_geojson` as an Arrow Struct whose geometry is a
+        // Vector wrapper — the geojson layer can't render it and the layers
+        // disappear. `buildDatasetUpdatePayload` materializes the result to
+        // plain column-ordered rows and keeps the original field descriptors
+        // for existing columns (strict superset, no renames needed).
+        const {rows, fields} = buildDatasetUpdatePayload(
+          arrowResult,
+          datasets[dataId].fields
         );
-        const fields = arrowSchemaToFields(arrowResult as any);
-
-        // No `renames`: existing columns keep their names, so the schema is a
-        // strict superset of the old one and layers/filters need no remapping.
-        ctx.dispatch(
-          updateDataset(dataId, {cols, fields, arrowTable: arrowResult} as any)
-        );
+        ctx.dispatch(updateDataset(dataId, {rows, fields} as any));
 
         const jsonResult = arrowTableToObjects(arrowResult);
         const valueSource =

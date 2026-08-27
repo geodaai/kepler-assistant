@@ -17,14 +17,14 @@
 import type {KeplerBridge} from '../kepler-bridge';
 import {tableFromArrays} from 'apache-arrow';
 import {updateDataset} from '@kepler.gl/actions';
-import {arrowSchemaToFields} from '@kepler.gl/processors';
 import type {KeplerContext} from '../mcp';
 import {
   getValuesFromDataset,
   getGeometriesFromDataset,
   datasetNameToTableName,
   getConnector,
-  ensureSpatialExtension
+  ensureSpatialExtension,
+  buildDatasetUpdatePayload
 } from '../glue/utils';
 import {
   saveToDuckdb,
@@ -203,13 +203,10 @@ export function createKeplerBridge(ctx: KeplerContext): KeplerBridge {
       }
       columnData[columnName] = values;
       const arrowTable = tableFromArrays(columnData);
-      ctx.dispatch(
-        updateDataset(dataId, {
-          cols: Array.from({length: arrowTable.numCols}, (_, i) => arrowTable.getChildAt(i)),
-          fields: arrowSchemaToFields(arrowTable as any),
-          arrowTable
-        } as any)
-      );
+      // Same as map.add-column: plain rows, not raw arrow columns, so `_geojson`
+      // stays a plain feature object and the geojson layers keep rendering.
+      const {rows, fields} = buildDatasetUpdatePayload(arrowTable, datasets[dataId].fields);
+      ctx.dispatch(updateDataset(dataId, {rows, fields} as any));
     },
 
     getMapboxToken: async () => ctx.getMapboxToken(),

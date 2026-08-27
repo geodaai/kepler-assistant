@@ -4,7 +4,7 @@ import {Layer, VectorTileLayer} from '@kepler.gl/layers';
 import {Datasets, KeplerTable} from '@kepler.gl/table';
 import {ALL_FIELD_TYPES, LAYER_TYPES} from '@kepler.gl/constants';
 import {Field, ProtoDataset, ProtoDatasetField} from '@kepler.gl/types';
-import {processFileData} from '@kepler.gl/processors';
+import {arrowSchemaToFields, processFileData} from '@kepler.gl/processors';
 import {createWasmDuckDbConnector, type DuckDbConnector} from '@sqlrooms/duckdb';
 import {tableFromArrays, Type} from 'apache-arrow';
 
@@ -463,6 +463,53 @@ export function arrowTableToObjects(table: {
     }
     return json;
   });
+}
+
+/**
+ * Build an `updateDataset` payload from an Arrow result so kepler's existing
+ * layers keep working after a DuckDB round-trip (used by `map.add-column` and
+ * the bridge's addColumnToDataset).
+ *
+ * DuckDB cannot preserve kepler's plain-JS `_geojson` column: it comes back as
+ * an Arrow Struct, and reading a StructRow yields `geometry.coordinates` as an
+ * Arrow Vector (not a plain array), which the geojson layer can't render (meta
+ * bounds go null, polygons disappear). So instead of handing kepler the raw
+ * arrow columns (`{cols, fields, arrowTable}`), we materialize the result to
+ * plain column-ordered rows (`convertArrowRowToObject` unwraps Struct/Vectors
+ * to real arrays) and rebuild the field descriptors, keeping the ORIGINAL
+ * type/analyzerType for existing columns so the schema stays a strict superset
+ * (the same representation the dataset had before the round-trip).
+ *
+ * @param arrowTable the DuckDB query result (arrow table)
+ * @param originalFields kepler field descriptors for the dataset before the update
+ * @returns an `updateDataset` `data` payload: `{rows, fields}`
+ */
+export function buildDatasetUpdatePayload(
+  arrowTable: any,
+  originalFields: Array<{name: string; type?: string; analyzerType?: string; format?: string}>
+): {rows: unknown[][]; fields: any[]} {
+  const fields = arrowSchemaToFields(arrowTable);
+  const originalByName = new Map(originalFields.map(f => [f.name, f]));
+  fields.forEach((field, i) => {
+    const original = originalByName.get(field.name);
+    if (original) {
+      // keep the round-trip field's (empty) arrow metadata: re-marking a column
+      // geoarrow would send the layer down the arrow path, but the container is
+      // now plain rows.
+      fields[i] = {
+        ...field,
+        type: original.type ?? field.type,
+        analyzerType: original.analyzerType ?? field.analyzerType,
+        format: original.format || field.format || ''
+      };
+    }
+  });
+
+  // RowDataContainer format: one array per row, indexed by field position.
+  const objects = arrowTableToObjects(arrowTable);
+  const columns = fields.map(f => f.name);
+  const rows = objects.map(obj => columns.map(name => obj[name]));
+  return {rows, fields};
 }
 
 /**

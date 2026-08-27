@@ -1,6 +1,10 @@
 import {describe, expect, it, afterEach, vi} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
-import {ensureKeplerDatasetsMaterialized, setStoreConnectorProvider} from './utils';
+import {
+  ensureKeplerDatasetsMaterialized,
+  setStoreConnectorProvider,
+  buildDatasetUpdatePayload
+} from './utils';
 import {createMockConnector} from '../mock-connector';
 
 // `utils.ts` imports `createWasmDuckDbConnector` from `@sqlrooms/duckdb` at
@@ -64,5 +68,59 @@ describe('ensureKeplerDatasetsMaterialized', () => {
 
     expect(connector.getLoadArrowCount('tbl_nyc_geojson')).toBe(1);
     expect(connector.hasTable('tbl_nyc_geojson')).toBe(true);
+  });
+});
+
+describe('buildDatasetUpdatePayload', () => {
+  const originalFields = [
+    {name: 'NAME', type: 'string', analyzerType: 'STRING', format: ''},
+    {name: 'KIDS2000', type: 'integer', analyzerType: 'INT', format: ''},
+    {name: '_geojson', type: 'geojson', analyzerType: 'GEOMETRY', format: ''}
+  ];
+
+  it('materializes a DuckDB round-trip to plain rows with real geometry arrays', () => {
+    const feature = (name: string) => ({
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-74, 40.7],
+            [-73.95, 40.7],
+            [-73.95, 40.75],
+            [-74, 40.7]
+          ]
+        ]
+      },
+      properties: {NAME: name, KIDS2000: name === 'NBH0' ? 39 : 20}
+    });
+    // This is exactly the shape DuckDB returns: `_geojson` is a Struct whose
+    // nested coordinates come back as Arrow Vectors.
+    const arrowTable = tableFromArrays({
+      NAME: ['NBH0', 'NBH1'],
+      KIDS2000: [39, 20],
+      _geojson: [feature('NBH0'), feature('NBH1')],
+      kidscat: [2, 1] // the newly added column
+    });
+
+    const {rows, fields} = buildDatasetUpdatePayload(arrowTable as any, originalFields as any);
+
+    // RowDataContainer format: one column-ordered array per row
+    expect(rows).toHaveLength(2);
+    expect(rows[0].map(() => true)).toHaveLength(4);
+    const geojsonValue = rows[0][2] as {geometry: {coordinates: number[][][]}};
+    // the geometry must be a plain array, NOT an Arrow Vector wrapper
+    expect(Array.isArray(geojsonValue.geometry.coordinates)).toBe(true);
+    expect(geojsonValue.geometry.coordinates[0][0]).toEqual([-74, 40.7]);
+
+    // existing columns keep their original descriptors (strict superset)
+    const geojsonField = fields.find(f => f.name === '_geojson');
+    expect(geojsonField.type).toBe('geojson');
+    expect(geojsonField.analyzerType).toBe('GEOMETRY');
+    // the new column is typed from the arrow schema
+    const kidscatField = fields.find(f => f.name === 'kidscat');
+    expect(kidscatField).toBeDefined();
+    // field order matches the column order the rows are indexed by
+    expect(fields.map(f => f.name)).toEqual(['NAME', 'KIDS2000', '_geojson', 'kidscat']);
   });
 });
