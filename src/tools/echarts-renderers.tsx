@@ -3,7 +3,7 @@ import type {ToolRenderer, ToolRendererRegistry} from '@sqlrooms/ai-core';
 import type {ExecuteApiOutput} from '../chat';
 import {BoxplotComponent} from '../charts/boxplot-component';
 import {HistogramComponent} from '../charts/histogram-component';
-import type {BoxplotBox, BoxplotDataProps} from '../charts/boxplot-option';
+import type {BoxplotDataProps} from '../charts/boxplot-option';
 
 /**
  * Histogram output types consumed by the renderer. The chart compute itself
