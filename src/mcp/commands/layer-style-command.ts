@@ -43,6 +43,11 @@ export function getUpdateLayerColorCommand(ctx: KeplerContext): RoomCommand {
         const newConfig = {};
 
         const oldColorRange = layer.config.visConfig.colorRange;
+        if (oldColorRange.colorMap && customColors.length !== oldColorRange.colorMap.length) {
+          throw new Error(
+            `Layer ${layerId} has ${oldColorRange.colorMap.length} classes (custom colorMap); provide exactly ${oldColorRange.colorMap.length} colors, got ${customColors.length}.`
+          );
+        }
         const newColorRange = {
           ...oldColorRange,
           colors: customColors,
