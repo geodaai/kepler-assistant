@@ -294,6 +294,46 @@ describe('AnalysisEngine', () => {
     expect((carto.data as {featureCount?: number}).featureCount).toBe(4);
   });
 
+  it('geoda.analysis cartogram reports WGS84 x/y/radius from the circle ring (not UTM garbage)', async () => {
+    // @geoda/core's UTM cartogram path back-projects properties.x/y/radius
+    // wrongly (it re-reads the degree values as UTM meters), so every feature
+    // comes back with a nonsense center (e.g. NYC → y≈8). The engine must
+    // derive the point center + radius from the (correct) circle ring.
+    const analysis = makeEngine();
+    // Small extent → triggers the UTM cartogram path inside @geoda/core.
+    const geoms = [square(0, 0), square(1, 0), square(0, 1), square(1, 1)];
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'cartogram', datasetName: 'sales', weightVariable: 'amount', iterations: 10, geometries: geoms
+    });
+    expect(res.success).toBe(true);
+    const feats = (res.data as {geojson?: {features?: Array<Record<string, any>>}}).geojson?.features;
+    expect(feats?.length).toBe(4);
+    for (const f of feats ?? []) {
+      const {x, y, radius} = f.properties as {x?: number; y?: number; radius?: number};
+      // The reported point must be the centroid of the returned circle ring —
+      // upstream garbage placed it ~80° away (e.g. NYC y≈8 instead of ≈40.6).
+      const ring = f.geometry.coordinates[0] as number[][];
+      let cl = 0;
+      let ct = 0;
+      for (const p of ring) {
+        cl += p[0];
+        ct += p[1];
+      }
+      cl /= ring.length;
+      ct /= ring.length;
+      expect(x).toBeCloseTo(cl, 3);
+      expect(y).toBeCloseTo(ct, 3);
+      // radius must match the ring (mean vertex distance), not the tiny value
+      // the buggy back-projection produced.
+      const dists = ring.map((p) => Math.hypot(p[0] - (x ?? 0), p[1] - (y ?? 0)));
+      const meanDist = dists.reduce((a, b) => a + b, 0) / dists.length;
+      expect(radius).toBeCloseTo(meanDist, 3);
+      expect(radius ?? 0).toBeGreaterThan(0);
+      // sanity: the ring is a circle around the point (vertex distances ~equal)
+      expect(Math.max(...dists) / Math.min(...dists)).toBeLessThan(1.2);
+    }
+  });
+
   it('geo.grid builds a rectangle grid', async () => {
     const analysis = makeEngine();
     const res = await analysis.invoke('geo.grid', {bbox: [[0, 0], [4, 4]], rows: 2, columns: 2});

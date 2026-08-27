@@ -489,6 +489,7 @@ export class AnalysisEngine {
     }
     const values = datasetName ? await this.columnValues(datasetName, weightVariable) : [];
     const features = await geodaCartogram(geometries, values.length ? values : geometries.map((_, i) => i + 1), iterations);
+    this.cartogramToWgs84(features);
     if (outputDatasetName && this.bridge?.saveResult) {
       await this.bridge.saveResult(outputDatasetName, {type: 'geojson', content: {type: 'FeatureCollection', features}});
     }
@@ -501,6 +502,38 @@ export class AnalysisEngine {
         details: `Cartogram from ${features.length} features (${weightVariable})${outputDatasetName ? ` → ${outputDatasetName}` : ''}.`
       }
     };
+  }
+
+  /**
+   * Rewrite cartogram features' `properties.x/y/radius` to correct WGS84
+   * (lng, lat, degrees) from the circle ring geometry.
+   *
+   * @geoda/core's `getCartogram` returns garbage x/y/radius on its UTM path
+   * (`cartogram_utm` in geodalib `cpp/src/geometry/cartogram.h`): the per-vertex
+   * loop overwrites each circle vertex with its WGS84 degrees, then re-reads
+   * those degree values as if they were still UTM meters to back-project
+   * x/y/radius — so e.g. every NYC feature comes back with y≈8 instead of ≈40.6.
+   * The circle ring itself IS back-projected correctly, so derive the point
+   * center (mean of the ring vertices) and radius (mean vertex distance) from
+   * it. This lets the result be rendered as a point layer at the right spot.
+   */
+  private cartogramToWgs84(features: Array<Record<string, any>>): void {
+    for (const feature of features) {
+      const ring = feature.geometry?.coordinates?.[0];
+      if (!Array.isArray(ring) || ring.length === 0) continue;
+      let lng = 0;
+      let lat = 0;
+      for (const p of ring) {
+        lng += p[0];
+        lat += p[1];
+      }
+      lng /= ring.length;
+      lat /= ring.length;
+      let radius = 0;
+      for (const p of ring) radius += Math.hypot(p[0] - lng, p[1] - lat);
+      radius /= ring.length;
+      feature.properties = {...feature.properties, x: lng, y: lat, radius};
+    }
   }
 
   private async geodaRate(args: Record<string, any>): Promise<ToolResult> {

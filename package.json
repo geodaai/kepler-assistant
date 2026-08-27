@@ -1,6 +1,6 @@
 {
   "name": "@openassistant/kepler-assistant",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "The kepler.gl AI assistant: the analysis engines (data.*, geoda.*, geo.*, chart.*) + agent loop + the kepler-agnostic ChatToolSurface. TEMPORARILY vendors the @kepler.gl/mcp map surface at src/mcp/ (single-repo prototyping); see NEXT_PLAN.md for the permanent separation.",
   "license": "MIT",
   "type": "module",
