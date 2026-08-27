@@ -24,7 +24,7 @@ import {
   datasetNameToTableName,
   getConnector,
   ensureSpatialExtension,
-  buildDatasetUpdatePayload
+  buildAddColumnPayload
 } from '../glue/utils';
 import {
   saveToDuckdb,
@@ -178,8 +178,10 @@ export function createKeplerBridge(ctx: KeplerContext): KeplerBridge {
 
     /**
      * Append a computed column to a kepler dataset in place (geoda write-back).
-     * Mirrors `map.add-column`'s UPDATE_DATASET flow: rebuild the arrow table
-     * with existing columns plus the new one so layers/filters keep working.
+     * Mirrors `map.add-column`'s UPDATE_DATASET flow: existing columns are read
+     * straight from the kepler dataset (never round-tripped through Arrow, which
+     * mangles mixed Polygon/MultiPolygon `_geojson` coordinates) and the new
+     * column's values come from geoda.
      */
     addColumnToDataset: async (datasetName, columnName, values) => {
       const visState = getVisState();
@@ -192,20 +194,14 @@ export function createKeplerBridge(ctx: KeplerContext): KeplerBridge {
           `Column "${columnName}" already exists in dataset "${datasetName}". Choose a different name.`
         );
       }
-      const columnData: Record<string, unknown[]> = {};
-      for (const field of fieldNames) {
-        columnData[field] = getValuesFromDataset(
-          datasets,
-          visState.layers,
-          datasetName,
-          field
-        );
-      }
-      columnData[columnName] = values;
-      const arrowTable = tableFromArrays(columnData);
-      // Same as map.add-column: plain rows, not raw arrow columns, so `_geojson`
-      // stays a plain feature object and the geojson layers keep rendering.
-      const {rows, fields} = buildDatasetUpdatePayload(arrowTable, datasets[dataId].fields);
+      const newColumnArrow = tableFromArrays({[columnName]: values});
+      const {rows, fields} = buildAddColumnPayload(
+        datasets,
+        visState.layers,
+        datasetName,
+        columnName,
+        newColumnArrow
+      );
       ctx.dispatch(updateDataset(dataId, {rows, fields} as any));
     },
 

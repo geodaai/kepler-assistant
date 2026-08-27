@@ -2,8 +2,8 @@ import type {RoomCommand} from '@sqlrooms/room-store';
 import {z} from 'zod';
 import {updateDataset} from '@kepler.gl/actions';
 import {KeplerContext} from './types';
-import {buildDatasetUpdatePayload} from '../../glue/utils';
-import {datasetNameToTableName, arrowTableToObjects, tableToLLMResult} from './utils';
+import {buildAddColumnPayload} from '../../glue/utils';
+import {datasetNameToTableName, tableToLLMResult} from './utils';
 
 export const addColumnCommandId = 'map.add-column' as const;
 
@@ -77,43 +77,43 @@ IMPORTANT: this command only ADDS columns. It cannot delete or rename-in-place a
         const dbTableName = datasetNameToTableName(datasetName);
         const db = await ctx.loadTableIntoDuckDB(datasetName, fieldNames, dbTableName);
 
-        // Add-only: keep every existing column and append the new one as either a
-        // copy of the source column or a computed expression. Explicit column
-        // list (no `SELECT *`) so the output column order is deterministic.
+        // Add-only: compute ONLY the new column in DuckDB. Existing columns are
+        // never round-tripped through DuckDB/Arrow — `tableFromArrays` infers a
+        // single Arrow type for `_geojson`, and a dataset mixing Polygon and
+        // MultiPolygon features gets the shallower type, so the MultiPolygon
+        // coordinates come back as nulls and the geometry disappears.
+        // `buildAddColumnPayload` rebuilds the payload from the original kepler
+        // values instead, appending the new column from this single-column result.
         const appendedSql =
           copyFromColumn != null
             ? `"${copyFromColumn}" AS "${newColumnName}"`
             : `(${expression}) AS "${newColumnName}"`;
-        const selectList = [
-          ...fieldNames.map(name => `"${name}"`),
-          appendedSql
-        ].join(', ');
         const arrowResult = await db.query(
-          `SELECT ${selectList} FROM "${dbTableName}"`
+          `SELECT ${appendedSql} FROM "${dbTableName}"`
         );
 
-        // Build the kepler payload as plain rows. Passing the raw arrow columns
-        // would round-trip `_geojson` as an Arrow Struct whose geometry is a
-        // Vector wrapper — the geojson layer can't render it and the layers
-        // disappear. `buildDatasetUpdatePayload` materializes the result to
-        // plain column-ordered rows and keeps the original field descriptors
-        // for existing columns (strict superset, no renames needed).
-        const {rows, fields} = buildDatasetUpdatePayload(
-          arrowResult,
-          datasets[dataId].fields
+        const {rows, fields} = buildAddColumnPayload(
+          datasets,
+          visState.layers,
+          datasetName,
+          newColumnName,
+          arrowResult
         );
         ctx.dispatch(updateDataset(dataId, {rows, fields} as any));
 
-        const jsonResult = arrowTableToObjects(arrowResult);
+        // LLM-facing preview: first 5 rows of the full (original + new) payload.
+        const previewRows = rows.slice(0, 5).map(r =>
+          Object.fromEntries(fields.map((f, i) => [f.name, r[i]]))
+        );
         const valueSource =
           copyFromColumn != null ? `copied from "${copyFromColumn}"` : `computed`;
         return {
           success: true,
           commandId: addColumnCommandId,
           data: {
-            details: `Added column "${newColumnName}" to dataset "${datasetName}" (${valueSource}, ${jsonResult.length} rows).`,
+            details: `Added column "${newColumnName}" to dataset "${datasetName}" (${valueSource}, ${rows.length} rows).`,
             addedColumns: [newColumnName],
-            firstFiveRows: tableToLLMResult(jsonResult.slice(0, 5))
+            firstFiveRows: tableToLLMResult(previewRows)
           }
         };
       } catch (error) {

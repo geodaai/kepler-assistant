@@ -466,49 +466,56 @@ export function arrowTableToObjects(table: {
 }
 
 /**
- * Build an `updateDataset` payload from an Arrow result so kepler's existing
- * layers keep working after a DuckDB round-trip (used by `map.add-column` and
- * the bridge's addColumnToDataset).
+ * Build an `updateDataset` payload that appends ONE new column to an existing
+ * kepler dataset, keeping every existing column byte-for-byte identical.
  *
- * DuckDB cannot preserve kepler's plain-JS `_geojson` column: it comes back as
- * an Arrow Struct, and reading a StructRow yields `geometry.coordinates` as an
- * Arrow Vector (not a plain array), which the geojson layer can't render (meta
- * bounds go null, polygons disappear). So instead of handing kepler the raw
- * arrow columns (`{cols, fields, arrowTable}`), we materialize the result to
- * plain column-ordered rows (`convertArrowRowToObject` unwraps Struct/Vectors
- * to real arrays) and rebuild the field descriptors, keeping the ORIGINAL
- * type/analyzerType for existing columns so the schema stays a strict superset
- * (the same representation the dataset had before the round-trip).
+ * Existing columns are read straight from the kepler dataset (via
+ * `getValuesFromDataset`) and NEVER round-tripped through Arrow/DuckDB. That
+ * matters for `_geojson`: `tableFromArrays` infers a single Arrow type for the
+ * whole column, and a dataset mixing Polygon and MultiPolygon features gets the
+ * shallower type — the MultiPolygon's deeper coordinate nesting comes back as
+ * nulls and the geometry disappears. Only the NEW column's values come from the
+ * computation (DuckDB expression / copy, or geoda write-back).
  *
- * @param arrowTable the DuckDB query result (arrow table)
- * @param originalFields kepler field descriptors for the dataset before the update
+ * @param datasets kepler datasets (visState.datasets)
+ * @param layers kepler layers (visState.layers) — needed for vector-tile datasets
+ * @param datasetName the dataset label
+ * @param newColumnName name of the column being appended
+ * @param newColumnArrow single-column arrow table holding the new column's values
  * @returns an `updateDataset` `data` payload: `{rows, fields}`
  */
-export function buildDatasetUpdatePayload(
-  arrowTable: any,
-  originalFields: Array<{name: string; type?: string; analyzerType?: string; format?: string}>
+export function buildAddColumnPayload(
+  datasets: Datasets,
+  layers: Layer[],
+  datasetName: string,
+  newColumnName: string,
+  newColumnArrow: any
 ): {rows: unknown[][]; fields: any[]} {
-  const fields = arrowSchemaToFields(arrowTable);
-  const originalByName = new Map(originalFields.map(f => [f.name, f]));
-  fields.forEach((field, i) => {
-    const original = originalByName.get(field.name);
-    if (original) {
-      // keep the round-trip field's (empty) arrow metadata: re-marking a column
-      // geoarrow would send the layer down the arrow path, but the container is
-      // now plain rows.
-      fields[i] = {
-        ...field,
-        type: original.type ?? field.type,
-        analyzerType: original.analyzerType ?? field.analyzerType,
-        format: original.format || field.format || ''
-      };
-    }
-  });
+  const datasetId = Object.keys(datasets).find(id => datasets[id].label === datasetName);
+  if (!datasetId) {
+    throw new Error(`Dataset "${datasetName}" not found.`);
+  }
+  const dataset = datasets[datasetId];
+  const originalFields = dataset.fields;
+
+  // The new column's values + field descriptor come from the computation's
+  // arrow result (DuckDB expression / copy, or geoda write-back).
+  const newColumnValues = arrowTableToObjects(newColumnArrow).map(o => o[newColumnName]);
+  const newField = arrowSchemaToFields(newColumnArrow)[0];
+
+  // Existing columns come from the original kepler dataset, never Arrow/DuckDB.
+  const columns = originalFields.map(f => ({
+    name: f.name,
+    values: getValuesFromDataset(datasets, layers, datasetName, f.name)
+  }));
 
   // RowDataContainer format: one array per row, indexed by field position.
-  const objects = arrowTableToObjects(arrowTable);
-  const columns = fields.map(f => f.name);
-  const rows = objects.map(obj => columns.map(name => obj[name]));
+  const rows = Array.from({length: dataset.length}, (_, i) => [
+    ...columns.map(c => c.values[i]),
+    newColumnValues[i]
+  ]);
+
+  const fields = [...originalFields, newField];
   return {rows, fields};
 }
 

@@ -3,7 +3,7 @@ import {tableFromArrays} from 'apache-arrow';
 import {
   ensureKeplerDatasetsMaterialized,
   setStoreConnectorProvider,
-  buildDatasetUpdatePayload
+  buildAddColumnPayload
 } from './utils';
 import {createMockConnector} from '../mock-connector';
 
@@ -71,56 +71,99 @@ describe('ensureKeplerDatasetsMaterialized', () => {
   });
 });
 
-describe('buildDatasetUpdatePayload', () => {
+describe('buildAddColumnPayload', () => {
   const originalFields = [
     {name: 'NAME', type: 'string', analyzerType: 'STRING', format: ''},
     {name: 'KIDS2000', type: 'integer', analyzerType: 'INT', format: ''},
     {name: '_geojson', type: 'geojson', analyzerType: 'GEOMETRY', format: ''}
   ];
 
-  it('materializes a DuckDB round-trip to plain rows with real geometry arrays', () => {
-    const feature = (name: string) => ({
+  // Mixed Polygon + MultiPolygon features — the case that broke: rebuilding the
+  // whole table through `tableFromArrays` infers the shallower Arrow type and
+  // nulls the MultiPolygon's deeper coordinate nesting.
+  const features = [
+    {
       type: 'Feature',
       geometry: {
         type: 'Polygon',
         coordinates: [
           [
             [-74, 40.7],
-            [-73.95, 40.7],
-            [-73.95, 40.75],
+            [-73.9, 40.7],
+            [-73.9, 40.8],
             [-74, 40.7]
           ]
         ]
       },
-      properties: {NAME: name, KIDS2000: name === 'NBH0' ? 39 : 20}
-    });
-    // This is exactly the shape DuckDB returns: `_geojson` is a Struct whose
-    // nested coordinates come back as Arrow Vectors.
-    const arrowTable = tableFromArrays({
-      NAME: ['NBH0', 'NBH1'],
-      KIDS2000: [39, 20],
-      _geojson: [feature('NBH0'), feature('NBH1')],
-      kidscat: [2, 1] // the newly added column
-    });
+      properties: {NAME: 'NBH0', KIDS2000: 39}
+    },
+    {
+      type: 'Feature',
+      geometry: {
+        type: 'MultiPolygon',
+        coordinates: [
+          [
+            [
+              [-73.9, 40.7],
+              [-73.8, 40.7],
+              [-73.8, 40.8],
+              [-73.9, 40.7]
+            ]
+          ]
+        ]
+      },
+      properties: {NAME: 'NBH1', KIDS2000: 20}
+    }
+  ];
 
-    const {rows, fields} = buildDatasetUpdatePayload(arrowTable as any, originalFields as any);
+  const datasets = {
+    nyc: {
+      label: 'nyc.geojson',
+      type: 'geojson',
+      length: 2,
+      fields: originalFields,
+      getValue: (name: string, i: number) => {
+        if (name === '_geojson') return features[i];
+        if (name === 'NAME') return features[i].properties.NAME;
+        return features[i].properties.KIDS2000;
+      }
+    }
+  };
+
+  it('keeps mixed Polygon/MultiPolygon _geojson coordinates intact', () => {
+    // the new column's single-column arrow result (what DuckDB / geoda returns)
+    const newColumnArrow = tableFromArrays({kidscat: [2, 1]});
+
+    const {rows, fields} = buildAddColumnPayload(
+      datasets as any,
+      [] as any,
+      'nyc.geojson',
+      'kidscat',
+      newColumnArrow
+    );
 
     // RowDataContainer format: one column-ordered array per row
     expect(rows).toHaveLength(2);
-    expect(rows[0].map(() => true)).toHaveLength(4);
-    const geojsonValue = rows[0][2] as {geometry: {coordinates: number[][][]}};
-    // the geometry must be a plain array, NOT an Arrow Vector wrapper
-    expect(Array.isArray(geojsonValue.geometry.coordinates)).toBe(true);
-    expect(geojsonValue.geometry.coordinates[0][0]).toEqual([-74, 40.7]);
+    expect(rows[0]).toHaveLength(4); // NAME, KIDS2000, _geojson, kidscat
 
-    // existing columns keep their original descriptors (strict superset)
+    // the MultiPolygon's coordinates must be real arrays, NOT nulls
+    const mp = rows[1][2] as {geometry: {type: string; coordinates: number[][][][]}};
+    expect(mp.geometry.type).toBe('MultiPolygon');
+    expect(Array.isArray(mp.geometry.coordinates)).toBe(true);
+    expect(mp.geometry.coordinates[0][0][0]).toEqual([-73.9, 40.7]);
+    // the Polygon's coordinates too
+    const poly = rows[0][2] as {geometry: {coordinates: number[][][]}};
+    expect(poly.geometry.coordinates[0][0]).toEqual([-74, 40.7]);
+
+    // the new column's values are appended
+    expect(rows[0][3]).toBe(2);
+    expect(rows[1][3]).toBe(1);
+
+    // existing fields keep their original descriptors; the new field is appended
+    expect(fields.map(f => f.name)).toEqual(['NAME', 'KIDS2000', '_geojson', 'kidscat']);
     const geojsonField = fields.find(f => f.name === '_geojson');
     expect(geojsonField.type).toBe('geojson');
     expect(geojsonField.analyzerType).toBe('GEOMETRY');
-    // the new column is typed from the arrow schema
-    const kidscatField = fields.find(f => f.name === 'kidscat');
-    expect(kidscatField).toBeDefined();
-    // field order matches the column order the rows are indexed by
-    expect(fields.map(f => f.name)).toEqual(['NAME', 'KIDS2000', '_geojson', 'kidscat']);
+    expect(fields[3].name).toBe('kidscat');
   });
 });
