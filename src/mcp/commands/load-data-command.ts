@@ -11,13 +11,24 @@ export function getLoadDataCommand(ctx: KeplerContext): RoomCommand {
     id: loadDataCommandId,
     name: 'Load data from URL',
     group: 'Map',
-    description: 'Load dataset from a URL into kepler.gl.',
+    description:
+      'Load a dataset from a URL into kepler.gl. The dataset is named after the URL filename, ' +
+      "or after `datasetName` when provided. Does NOT create a layer — call map.add-layer to visualize. " +
+      "Do NOT create a duplicate dataset (e.g. via map.create-table) just to rename it; " +
+      'name it here with `datasetName` instead, or use the URL-filename dataset as-is.',
     metadata: {readOnly: false, riskLevel: 'medium', requiresConfirmation: true},
     inputSchema: z.object({
-      url: z.string().describe('The URL to load data from')
+      url: z.string().describe('The URL to load data from'),
+      datasetName: z
+        .string()
+        .optional()
+        .describe(
+          'Optional name for the loaded dataset. If omitted, the URL filename is used. ' +
+            'Use this instead of creating a duplicate dataset to rename it.'
+        )
     }) as any,
     execute: async (_execCtx, input) => {
-      const {url} = (input ?? {}) as {url: string};
+      const {url, datasetName} = (input ?? {}) as {url: string; datasetName?: string};
       try {
         try {
           new URL(url);
@@ -52,6 +63,14 @@ export function getLoadDataCommand(ctx: KeplerContext): RoomCommand {
           if (result.done) {
             parsedData = await processFileData({content, fileCache: []});
             break;
+          }
+        }
+
+        // Apply a caller-chosen dataset name (default: the URL filename) so the
+        // agent never has to create a duplicate dataset just to rename it.
+        for (const d of parsedData) {
+          if (d?.info) {
+            d.info.label = datasetName ?? d.info.label ?? fileName;
           }
         }
 

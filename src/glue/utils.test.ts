@@ -3,7 +3,11 @@ import {tableFromArrays} from 'apache-arrow';
 import {
   ensureKeplerDatasetsMaterialized,
   setStoreConnectorProvider,
-  buildAddColumnPayload
+  buildAddColumnPayload,
+  arrowTableToObjects,
+  isObjectColumn,
+  stringifyObjectColumn,
+  restoreObjectColumns
 } from './utils';
 import {createMockConnector} from '../mock-connector';
 
@@ -165,5 +169,92 @@ describe('buildAddColumnPayload', () => {
     expect(geojsonField.type).toBe('geojson');
     expect(geojsonField.analyzerType).toBe('GEOMETRY');
     expect(fields[3].name).toBe('kidscat');
+  });
+});
+
+describe('stringifyObjectColumn / restoreObjectColumns', () => {
+  // Mixed Polygon + MultiPolygon features — the shape that broke `map.create-table`
+  // (and the shared materialization helpers): handed to `tableFromArrays` raw, Arrow
+  // infers the shallower (Polygon) type for the whole column and nulls the
+  // MultiPolygon's deeper coordinate nesting.
+  const features = [
+    {
+      geometry: {
+        type: 'Polygon',
+        coordinates: [
+          [
+            [-74, 40.7],
+            [-73.9, 40.7],
+            [-73.9, 40.8],
+            [-74, 40.7]
+          ]
+        ]
+      }
+    },
+    {
+      geometry: {
+        type: 'MultiPolygon',
+        coordinates: [
+          [
+            [
+              [-73.9, 40.7],
+              [-73.8, 40.7],
+              [-73.8, 40.8],
+              [-73.9, 40.7]
+            ]
+          ]
+        ]
+      }
+    }
+  ];
+
+  it('flags columns holding object values', () => {
+    expect(isObjectColumn([null, features[0].geometry])).toBe(true);
+    expect(isObjectColumn([undefined])).toBe(false);
+    expect(isObjectColumn([null, 'plain string'])).toBe(false);
+    expect(isObjectColumn([null, 42])).toBe(false);
+  });
+
+  it('keeps mixed Polygon/MultiPolygon coordinates intact through the DuckDB Arrow round-trip', () => {
+    // The exact sequence `map.create-table` (and `ensureKeplerDatasetsMaterialized` /
+    // `loadTableIntoDuckDB`) run: stringify object columns before `tableFromArrays`,
+    // then restore the JSON strings back to objects after `arrowTableToObjects`.
+    const geometry = features.map(f => f.geometry);
+    const objectColumns = isObjectColumn(geometry) ? ['_geojson'] : [];
+
+    const arrowTable = tableFromArrays({_geojson: stringifyObjectColumn(geometry)});
+    const jsonResult = arrowTableToObjects(arrowTable);
+    restoreObjectColumns(jsonResult, objectColumns);
+
+    expect(jsonResult).toHaveLength(2);
+
+    const poly = jsonResult[0]._geojson as {type: string; coordinates: number[][][]};
+    expect(poly.type).toBe('Polygon');
+    expect(poly.coordinates[0][0]).toEqual([-74, 40.7]);
+
+    const mp = jsonResult[1]._geojson as {type: string; coordinates: number[][][][]};
+    expect(mp.type).toBe('MultiPolygon');
+    expect(Array.isArray(mp.coordinates)).toBe(true);
+    expect(mp.coordinates[0][0][0]).toEqual([-73.9, 40.7]);
+  });
+
+  it('raw tableFromArrays nulls the MultiPolygon coordinates (why stringify is needed)', () => {
+    // Canary: if Arrow ever stops nulling deeper nesting, this test fails loudly and
+    // the stringify/restore dance may become unnecessary.
+    const raw = tableFromArrays({_geojson: features.map(f => f.geometry)});
+    const jsonResult = arrowTableToObjects(raw);
+    const mp = jsonResult[1]._geojson as {coordinates: (number | null)[][][][]};
+    expect(Array.isArray(mp.coordinates[0][0][0])).toBe(false);
+  });
+
+  it('passes plain columns through unchanged', () => {
+    const values = ['a', 'b', null];
+    expect(stringifyObjectColumn(values)).toBe(values);
+  });
+
+  it('leaves non-JSON strings alone during restore', () => {
+    const rows = [{_geojson: 'not json'}];
+    restoreObjectColumns(rows, ['_geojson']);
+    expect(rows[0]._geojson).toBe('not json');
   });
 });

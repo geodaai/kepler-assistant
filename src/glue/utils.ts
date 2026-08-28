@@ -115,6 +115,55 @@ export function getValuesFromVectorTileLayer(datasetId: string, layers: Layer[],
   return values;
 }
 
+/**
+ * Whether a column holds any non-null object value — e.g. the `_geojson` column,
+ * which stores whole GeoJSON Feature objects. Such columns must NOT be handed to
+ * `tableFromArrays` raw: Arrow infers ONE type per column from the first value,
+ * and a dataset mixing Polygon (depth-3 `coordinates`) and MultiPolygon (depth-4)
+ * features gets the shallower type, so the MultiPolygon coordinates come back as
+ * `null` and the geometry disappears. Serialize them to JSON strings for the
+ * DuckDB round-trip and restore with `restoreObjectColumns`.
+ */
+export function isObjectColumn(values: unknown[]): boolean {
+  return values.some(v => v !== null && v !== undefined && typeof v === 'object');
+}
+
+/**
+ * Serialize object values to JSON strings (nulls/primitives pass through
+ * unchanged) so `tableFromArrays` never has to infer a nested-struct type.
+ */
+export function stringifyObjectColumn(values: unknown[]): unknown[] {
+  if (!isObjectColumn(values)) return values;
+  return values.map(v => {
+    if (v === null || v === undefined) return null;
+    return typeof v === 'object' ? JSON.stringify(v) : v;
+  });
+}
+
+/**
+ * Restore object-valued columns that `stringifyObjectColumn` serialized back to
+ * their object form, in place. Used after a DuckDB query returns those columns
+ * as JSON strings (e.g. `_geojson` after `SELECT *`).
+ */
+export function restoreObjectColumns(
+  rows: Record<string, unknown>[],
+  columnNames: string[]
+): void {
+  if (columnNames.length === 0) return;
+  for (const row of rows) {
+    for (const name of columnNames) {
+      const value = row[name];
+      if (typeof value === 'string') {
+        try {
+          row[name] = JSON.parse(value);
+        } catch {
+          // Not JSON — leave the string as-is.
+        }
+      }
+    }
+  }
+}
+
 export function highlightRows(
   datasets: Datasets,
   layers: Layer[],
@@ -682,7 +731,11 @@ export async function ensureKeplerDatasetsMaterialized(
 
       const columnData: Record<string, unknown[]> = {};
       for (const varName of variableNames) {
-        columnData[varName] = getValuesFromDataset(datasets, layers, label, varName);
+        // Stringify object-valued columns (`_geojson` Features) so mixed
+        // Polygon/MultiPolygon coordinate nesting survives `tableFromArrays`.
+        columnData[varName] = stringifyObjectColumn(
+          getValuesFromDataset(datasets, layers, label, varName)
+        );
       }
       const arrowTable = tableFromArrays(columnData);
       await db.loadArrow(arrowTable, dbTableName);

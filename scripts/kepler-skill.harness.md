@@ -24,3 +24,7 @@ harness-specific details that belong to this assistant, not to the map surface.
 - `data.filter` and `data.load-to-map` also produce datasets without a layer —
   call `map.add-layer` after them, exactly like after `map.load-data` /
   `map.save-data` / `map.create-table`.
+- When loading data from a URL, the dataset keeps the URL filename — or the
+  `datasetName` you pass to `map.load-data`. NEVER create a duplicate dataset
+  (`map.create-table` with a plain `SELECT *`) just to rename it; use the
+  loaded dataset as-is.

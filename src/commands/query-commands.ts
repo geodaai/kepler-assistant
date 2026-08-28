@@ -10,7 +10,8 @@ import {
   getConnector,
   datasetNameToTableName,
   convertArrowRowToObject,
-  tableToLLMResult
+  tableToLLMResult,
+  stringifyObjectColumn
 } from '../glue/utils';
 import {saveToDuckdb, tableExists} from '../glue/duckdb-cache';
 import {runAnalysis} from '../analysis';
@@ -57,7 +58,12 @@ export async function loadTableIntoDuckDB(
     if (existingColumns.size === 0) {
       const columnData: Record<string, unknown[]> = {};
       for (const varName of variableNames) {
-        columnData[varName] = await getValues(datasetName, varName);
+        // Object-valued columns (e.g. `_geojson` Feature objects) are serialized
+        // to JSON strings so `tableFromArrays` never infers a shallow Arrow
+        // struct that nulls the deeper MultiPolygon coordinate nesting. This is
+        // the same mixed Polygon/MultiPolygon hazard the add-column fix (v0.0.7)
+        // dodged by reading existing columns straight from the kepler dataset.
+        columnData[varName] = stringifyObjectColumn(await getValues(datasetName, varName));
       }
       const arrowTable: ArrowTable = tableFromArrays(columnData);
       await db.execute(`DROP TABLE IF EXISTS "${dbTableName}"`);
@@ -74,7 +80,7 @@ export async function loadTableIntoDuckDB(
       }
 
       for (const varName of missingVars) {
-        columnData[varName] = await getValues(datasetName, varName);
+        columnData[varName] = stringifyObjectColumn(await getValues(datasetName, varName));
       }
 
       const arrowTable: ArrowTable = tableFromArrays(columnData);

@@ -248,6 +248,20 @@ This fetches the data, parses it, and adds it to the map as a dataset. It
 does NOT create a layer — call `map.add-layer` afterward to visualize the
 data (with the layer type, color, and styling you want).
 
+The dataset is named after the URL filename (e.g. `nyc.geojson`). If the
+user wants a specific dataset name, pass it as `datasetName`:
+
+```json
+{ "url": "https://.../nyc.geojson", "datasetName": "NYC Neighborhoods" }
+```
+
+Do NOT create a duplicate dataset just to rename it — never run
+`map.create-table` with a plain `SELECT *` (or any copy) to give the loaded
+data a friendlier name. `map.create-table` creates a SEPARATE new dataset and
+is only for real column transformations; the rename belongs in
+`map.load-data`'s `datasetName` (or in the user's hands). Use the loaded
+dataset as-is and add the layer to it.
+
 ### 8. Map boundary
 
 ```json
@@ -295,6 +309,9 @@ change to land in the existing dataset.
   EXISTING dataset, use `map.add-column` (copy or expression) — do NOT create a
   new dataset. `map.create-table` only when the user wants a SEPARATE new
   dataset.
+- A dataset loaded from a URL keeps the URL filename (or the `datasetName` you
+  pass to `map.load-data`). NEVER create a duplicate dataset via
+  `map.create-table` just to rename it — use the loaded dataset as-is.
 - For change-over-time requests, create exactly ONE animated layer — never
   a separate static layer per time step.
 - Do not add a `map.add-time-filter` to a trip layer — trips animate

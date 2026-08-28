@@ -5,6 +5,7 @@ import {addDataToMap} from '@kepler.gl/actions';
 import {processFileData} from '@kepler.gl/processors';
 import {KeplerContext} from './types';
 import {datasetNameToTableName, arrowTableToObjects} from './utils';
+import {isObjectColumn, stringifyObjectColumn, restoreObjectColumns} from '../../glue/utils';
 
 export const tableCommandId = 'map.create-table' as const;
 
@@ -41,8 +42,17 @@ IMPORTANT: Use __TABLE__ as the table name placeholder in SQL. It will be replac
         const dbTableName = datasetNameToTableName(datasetName);
         const resolvedSql = sql.replace(/__TABLE__/g, `"${dbTableName}"`);
         const columnData: Record<string, unknown[]> = {};
+        // Object-valued columns (the `_geojson` Feature objects) must not be
+        // round-tripped through Arrow raw: `tableFromArrays` infers ONE Arrow
+        // type per column from the first value, so a dataset mixing Polygon and
+        // MultiPolygon features gets the shallower (Polygon) coordinate nesting
+        // and the MultiPolygon coordinates come back as nulls. Stringify them
+        // for the DuckDB round-trip and restore the objects afterwards.
+        const objectColumns: string[] = [];
         for (const varName of variableNames) {
-          columnData[varName] = ctx.getValuesFromDataset(datasetName, varName);
+          const values = ctx.getValuesFromDataset(datasetName, varName);
+          if (isObjectColumn(values)) objectColumns.push(varName);
+          columnData[varName] = stringifyObjectColumn(values);
         }
 
         const arrowTable: ArrowTable = tableFromArrays(columnData);
@@ -54,6 +64,7 @@ IMPORTANT: Use __TABLE__ as the table name placeholder in SQL. It will be replac
         const arrowResult = await db.query(resolvedSql);
 
         const jsonResult: Record<string, unknown>[] = arrowTableToObjects(arrowResult);
+        restoreObjectColumns(jsonResult, objectColumns);
 
         const parsedData = await processFileData({
           content: {data: jsonResult, fileName: resultDatasetName},
