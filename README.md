@@ -141,7 +141,63 @@ The same layout, by directory:
 | `src/map/` | kepler map controls: the `ai-assistant` control button (opens the assistant panel) and its `AiStar` icon. |
 | `skills/built-in/` | The repo-owned seed skills (`charts`, `colocation`, `spatial-filter`, `us-boundaries`); `kepler` and `geoda-analysis` come from elsewhere (see Skills). |
 | `scripts/` | Build + verification: `generate-skills.mjs` (bundles the seed skills) and the `verify-*.mjs` scripts (engine, agent, surface, bridge, live demo-app). |
-| `dist/` | `pnpm build` output — the browser-safe `engine` / `chat` subpaths plus the Node CLI. |
+| `dist/` | `pnpm build` output — the browser-safe `engine` / `chat` subpaths (one ESM bundle per src module). |
+
+## The glue layer
+
+`src/glue/` is the bridge between the kepler-agnostic engine and the kepler.gl
+app — the one place that knows how to move data between kepler's world
+(`Datasets`, `KeplerTable`, `Layer`) and DuckDB's world (Arrow tables, SQL).
+It exists because the three layers around it have *opposite* coupling
+requirements:
+
+| Layer | Must be | Because |
+| --- | --- | --- |
+| Analysis engine (`data.*`, `geoda.*`, `geo.*`, `chart.*`) | **kepler-agnostic** — never imports `@kepler.gl/*` | testable in Node, reusable without a map |
+| Vendored map surface (`src/mcp/` — the `map.*` commands) | **free of DuckDB / kepler-app wiring** | it is meant to be published as `@kepler.gl/mcp` and driven by any host |
+| kepler.gl app (host) | owns datasets, layers, map state, redux | that is just what kepler is |
+
+Two files, two responsibilities:
+
+- **`src/glue/utils.ts`** — the kepler↔DuckDB data movement: the `KeplerContext`
+  glue methods (`getValuesFromDataset`, `getDatasetContext`, `getConnector`) and
+  the analysis glue the `KeplerBridge` and analysis shims use
+  (`getGeometriesFromDataset`, `datasetNameToTableName`, `ensureSpatialExtension`,
+  `highlightRows`, `interpolateColor`, `formatResultsForLLM`, …).
+- **`src/glue/duckdb-cache.ts`** — Arrow-based table loading + the
+  materialized-tables cache: `loadTableToKepler`, `saveToDuckdb`,
+  `getTableAsGeoJSON`, `saveGeojsonToDuckdb`, `tableExists`. `loadRowsToArrow`
+  inserts natively via `db.loadArrow` — the old `db.loadObjects` path inlined
+  every row as `SELECT <literal> UNION ALL …` and blew past DuckDB's
+  `max_expression_depth` (1000) past a few hundred rows.
+
+It is wired in through two seams:
+
+- **`KeplerContext`** (map.* commands → glue). The vendored `map.*` commands
+  never touch DuckDB or kepler internals; they only call the five methods on
+  `KeplerContext` (`src/mcp/commands/types.ts`). The host implements that
+  context in `src/store.ts` (`getKeplerContext()`), wiring the glue methods to
+  the app's kepler state accessors (`setKeplerStateAccessors`) and redux store
+  (`setReduxStore`).
+- **`KeplerBridge`** (analysis engine → glue). The kepler-agnostic
+  `AnalysisEngine` calls a `KeplerBridge` for kepler-bound steps — materializing
+  a dataset into DuckDB, pushing a result table onto the map, writing a computed
+  column back, resolving geometries / mapbox token / boundary.
+  `src/analysis/bridge.ts` (`createKeplerBridge`) implements that bridge *in
+  terms of the glue*, reusing its helpers rather than duplicating them.
+
+One more piece of wiring: `setStoreConnectorProvider` (`src/glue/utils.ts`) makes
+tools, skills, and the wrapped `query` tool all share **one** DuckDB instance
+(the store's). Without it, skills would write tables the query tool cannot see
+and vice versa. It falls back to a standalone `WasmDuckDbConnector` singleton for
+unit tests that never build the full store.
+
+The payoff: the engine stays kepler-agnostic (runs in Node with a mock connector,
+no map), the map surface stays host-agnostic (any host implements the
+`KeplerContext` seam — which is what makes the permanent separation in
+`NEXT_PLAN.md` possible), and the gnarly conversions — kepler datasets → Arrow →
+DuckDB, DuckDB tables → kepler datasets, and the GeoJSON flavor for spatial SQL
+(a `geometry` column, not kepler's map-side `_geojson`) — live in one place.
 
 ## Request flows
 
@@ -284,11 +340,11 @@ pnpm build        # runs scripts/generate-skills.mjs first; needs the
                   # geoda-analysis skill dir to exist (default: the geoda-lib
                   # checkout at ~/github/geoda-lib/skills/geoda-analysis, or
                   # set GEODA_SKILL_DIR to point at it)
-node scripts/verify-engine.mjs   # analysis engine over MCP
+node scripts/verify-engine.mjs   # analysis engine
 node scripts/verify-agent.mjs    # agent loop
 node scripts/verify-surface.mjs  # ChatToolSurface conformance
-node scripts/verify-live.mjs     # full server drives the real demo-app (map + analysis)
-node dist/cli.js                 # serve map + analysis over stdio
+node scripts/verify-bridge.mjs   # KeplerBridge glue conformance
+node scripts/verify-live.mjs     # drives the real demo-app (map + analysis)
 ```
 
 ## Demo-app
