@@ -25,7 +25,7 @@ importers:
         version: 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/core@4.4.5)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@4.1.0)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@19.2.8(react@19.2.8))(react-test-renderer@16.14.0(react@19.2.8))(react@19.2.8)(typescript@5.9.3)(ws@8.21.3)
       '@kepler.gl/components':
         specifier: ^3.2.0
-        version: 3.2.6(8c85acbbe154499a6f29c74cb5a1291b)
+        version: 3.2.6(29a34026964fff18d062d4c970ee63fa)
       '@kepler.gl/constants':
         specifier: ^3.2.0
         version: 3.2.6
@@ -37,7 +37,7 @@ importers:
         version: 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@4.1.0)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@19.2.8(react@19.2.8))(react-test-renderer@16.14.0(react@19.2.8))(react@19.2.8)(typescript@5.9.3)(ws@8.21.3)
       '@kepler.gl/reducers':
         specifier: ^3.2.0
-        version: 3.2.6(8aec6ec3b85138af7bfcedd33ee82f09)
+        version: 3.2.6(2948b35d28a74c81fc470444571ed14d)
       '@kepler.gl/table':
         specifier: ^3.2.0
         version: 3.2.6(@loaders.gl/core@4.4.5)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(react-dom@19.2.8(react@19.2.8))(react-test-renderer@16.14.0(react@19.2.8))(react@19.2.8)
@@ -45,20 +45,20 @@ importers:
         specifier: ^3.2.0
         version: 3.2.6
       '@sqlrooms/ai':
-        specifier: 0.29.0-rc.11
-        version: 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+        specifier: 0.29.0-rc.12
+        version: 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
       '@sqlrooms/ai-core':
-        specifier: 0.29.0-rc.11
-        version: 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+        specifier: 0.29.0-rc.12
+        version: 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
       '@sqlrooms/duckdb':
-        specifier: 0.29.0-rc.11
-        version: 0.29.0-rc.11(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+        specifier: 0.29.0-rc.12
+        version: 0.29.0-rc.12(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
       '@sqlrooms/room-store':
-        specifier: 0.29.0-rc.11
-        version: 0.29.0-rc.11(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+        specifier: 0.29.0-rc.12
+        version: 0.29.0-rc.12(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
       '@sqlrooms/ui':
-        specifier: 0.29.0-rc.11
-        version: 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+        specifier: 0.29.0-rc.12
+        version: 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       '@turf/bbox':
         specifier: ^7.4.0
         version: 7.4.0
@@ -2041,95 +2041,95 @@ packages:
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
 
-  '@sqlrooms/ai-config@0.29.0-rc.11':
-    resolution: {integrity: sha512-+q4TqeJpVBzqByr6RNl2ExW12EQ/iSMmAl8uBtnaVD+oJpg17bCstfWdHyj3i6Q3/zVwmR1vSxkPVj0IqdsfRA==}
+  '@sqlrooms/ai-config@0.29.0-rc.12':
+    resolution: {integrity: sha512-GSp5xhupNUa6TIU7UdeN6758g+dnntTHxnwuqtIMZA1KHxhGMh7SHW7NBtihR4hNospVY2EMEs3O1irRAyuJfQ==}
 
-  '@sqlrooms/ai-core@0.29.0-rc.11':
-    resolution: {integrity: sha512-WxdIpU5DcpV8qyTSyBhGRWWWetPdHywPSSS4F/wneuc9Y32Ckj3qyr7L29QMvU50k6FMQAX0ezaItRneAzIypA==}
+  '@sqlrooms/ai-core@0.29.0-rc.12':
+    resolution: {integrity: sha512-o9RheLnlltzQBUvdlona+GJqTaWQp5s6PutkKDz6/Yh+OcR2S6Tc67dH2KSOtKNuh1yuaYHV7IdUbhB55yGctA==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/ai-settings@0.29.0-rc.11':
-    resolution: {integrity: sha512-roeSspOvAYpmVLWpBfY3/faLUFfvjvcRrKqB+jsfD91E4Mm903t/A2obEuA1x/7pvCiq6DbLHgvhLYR4aSTjyQ==}
+  '@sqlrooms/ai-settings@0.29.0-rc.12':
+    resolution: {integrity: sha512-R02Ndx0tyvk/20FKJ7i9+DSokTFz9jCu+D+ynic3h933oy4kfFr2kQiOViqFuJoEHyXyRVV/6WjEviueeNEOsA==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/ai@0.29.0-rc.11':
-    resolution: {integrity: sha512-ajQvhUDKLrd5SyBAoU66W/lSyY0ABAzd21+EeAtMr1zOnDYWd0/fLJvdXaNCN2a+G5qkaHMwJg6HRjZz1fyJzQ==}
+  '@sqlrooms/ai@0.29.0-rc.12':
+    resolution: {integrity: sha512-r6fEb03T4HUSvY6xWWqWZa+215nURBr0ruE+UZgjF5ygQSDQsY+14UWn7kx9z2Y1QaWw1QcdcbC4RMfiWY0xbg==}
     peerDependencies:
       apache-arrow: 17.0.0
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/codemirror@0.29.0-rc.11':
-    resolution: {integrity: sha512-Pwj2stLSwZWeeGV4NNc0TjqwB/iN8G9RPlK7ijxUFMmSEMujjr7PY3M8XqTHXuiF2qKz/7lGZD0ojuQgv3p3Sw==}
+  '@sqlrooms/codemirror@0.29.0-rc.12':
+    resolution: {integrity: sha512-OxeR7fzSQEWlo85WBLE6nD8JptuZH46ppfi1+8z70AvLcgUwY6D4nVS6BLNcQFy7ZidN5SAbgrD9FMd7178PVw==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/data-table@0.29.0-rc.11':
-    resolution: {integrity: sha512-ly53yiCcodz8KWsMMYoEoJM+eZaYtVTd1cNNwZQhXoz1VL5jN7hGJSuu6s12iLT7BZfNl4byAqZFW2Xyes0Kag==}
+  '@sqlrooms/data-table@0.29.0-rc.12':
+    resolution: {integrity: sha512-inr6PGsFrMEeXKXAcYHZUu6wa2kf4ZGkcLw+v99sCVKcMfxlp5EosLjwTdXoqN2cnv0AjWzSVGyf/ik7nyKGUg==}
     peerDependencies:
       apache-arrow: '>=17'
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/db@0.29.0-rc.11':
-    resolution: {integrity: sha512-yjgJy5Z1S3TkoB37Huf1ZYL8DcdVAkYcU/ZTdT/SldIJRqg9a/zAUQ0//Ld1lHM7lF2n7fgBVFNEgk3F/wEwQg==}
+  '@sqlrooms/db@0.29.0-rc.12':
+    resolution: {integrity: sha512-YcGuJXTuQDJNDUhPTQD1IWLDX6AezmAkFj+J6psByHht9HDNLXa6gKCe+FRtfnpgSduc4CABiuh9jtj7MH4vNg==}
     peerDependencies:
       apache-arrow: 17.0.0
 
-  '@sqlrooms/duckdb-core@0.29.0-rc.11':
-    resolution: {integrity: sha512-ZfEBMuBhS9NZcR7y9ESNJBwoMCI7x/m5Y7Xmsv5qtr8Y1kVGIl4o6QmDp225WrFP82PeGWO7KG9+RGfQ1yxH1g==}
+  '@sqlrooms/duckdb-core@0.29.0-rc.12':
+    resolution: {integrity: sha512-ZgFZYvd8thyWK+rRUsClen6+8fHIPPQ50hZLQ6+FGJTo7tCUp/rIAvzmJa14qRse8dSKufyMrUD42w+nmgB1ZA==}
     peerDependencies:
       apache-arrow: 17.0.0
 
-  '@sqlrooms/duckdb@0.29.0-rc.11':
-    resolution: {integrity: sha512-oZHq7OhlKO0LJpt//MmJ7sIH5Gf/XmillbdHF6O3VquVVr6eRpVNfiMUTJzqg2JR2aJVY1/7XX6t8fIZPu7qgg==}
+  '@sqlrooms/duckdb@0.29.0-rc.12':
+    resolution: {integrity: sha512-lRLA+zDLD8/ys7+qCdKY1xS9iZDRtnu4y7rBPagcSe75RRFVRtPfMgkY25YfWrA5lDb0cC7jRIM+pN68rlsfmQ==}
     peerDependencies:
       apache-arrow: 17.0.0
 
-  '@sqlrooms/layout-config@0.29.0-rc.11':
-    resolution: {integrity: sha512-20BDTVkqGN20JzdNFJc8rxGh05F+Vq9NLpKCvlpxOPHf9wSs901R562H+wa8d5e28Fk5x+pe8HmGzLu6G8ZKaw==}
+  '@sqlrooms/layout-config@0.29.0-rc.12':
+    resolution: {integrity: sha512-63eRxh6m8HvZzC6ui92NnBd7DDVtC5vq/UHiE+BYSX7znGUYvWW2IIjQD2JmwBtOcQk2o2kX+Vy8FbJpIwIElQ==}
 
-  '@sqlrooms/layout@0.29.0-rc.11':
-    resolution: {integrity: sha512-D5iVJBuhsvApjItil1DnINAG/Fw2gcD8GGnuzOPPiGA9UgAnYAupYP/dEaoH/ru+W3mxqchkLCxFq8/RFo7+jw==}
+  '@sqlrooms/layout@0.29.0-rc.12':
+    resolution: {integrity: sha512-bU1ZJD0FRDkKeqOFov/0HV5YrUdpQb2aLeZRBY3uH7UQHC8kUZ+qTJuP8C33jB1aca7pOfzoE8mq5nGAd5MFVg==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/recharts@0.29.0-rc.11':
-    resolution: {integrity: sha512-eBMeBT9FkTuSWK7LKXbTOTjWTIluNdxlTVjt7opwGLNerPiJBEQLJY9bHwUU1rly6kEOypXMb6ZRFRM3AJq8Jg==}
+  '@sqlrooms/recharts@0.29.0-rc.12':
+    resolution: {integrity: sha512-GLUmnVyCtHwqJha0D5cQGrSAxPxU7td5yJs/F5u0qFax1LdSSVnBNJua51O79XoZ/CDFVC2+CYLA0iKUXHZA2g==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/room-config@0.29.0-rc.11':
-    resolution: {integrity: sha512-BqDoWxvj3tDn2W3L7OJSWYjwS1MBmmO2ECIkOJdRlKindaufCNK75pfrNjRzB4eEPo39dABhii/WT63WOfR4PQ==}
+  '@sqlrooms/room-config@0.29.0-rc.12':
+    resolution: {integrity: sha512-KRsh7k8vIJpbHle699COomtwoAXIbhrGX7qOjmYLTkduJKMYIdDoqR8Q0Fla6AJ0niWdP/D9hJ05MWkbHFxdOQ==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/room-shell@0.29.0-rc.11':
-    resolution: {integrity: sha512-ECoDj0xM5MfnX4L6eszMncH/YV0/FgK8QEKY55Lf5TNmrQKOH8d+FsQgvb7cV9jslnp3rW2X0KRrJvF1peq6cA==}
+  '@sqlrooms/room-shell@0.29.0-rc.12':
+    resolution: {integrity: sha512-b80SEfcqijOnF6tL/4fzscCh+mm0Oh7ljQwv8AA7L7Cv6pHbL3BBBx0Kix+k9673+F7QXNi/8ulKMh28ts+qtg==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@sqlrooms/room-store@0.29.0-rc.11':
-    resolution: {integrity: sha512-TWKPREtMqwtUfS0/qyEClacT5Bve9zvDl8dC2Ml9orSmH31rpRle1dk2G1KfcJTyy3omgaXzmJ9adondchdUDA==}
+  '@sqlrooms/room-store@0.29.0-rc.12':
+    resolution: {integrity: sha512-H40vaK4+iY24H/JhekNw1hYJjppeHAq2rirHKsHPY3ORmWLB0yIIBCtAMg6EIB23nWPJ2w8HFkmOgT9VOEKBxQ==}
     peerDependencies:
       react: '>=18'
 
-  '@sqlrooms/ui@0.29.0-rc.11':
-    resolution: {integrity: sha512-wFoqEf9CzW3tNMV5TphRfko6RaAXpo7zABZKjTlkvo7+HTBURjkqOCh7q1miTd9irTylmtI16uzfXCb2TYvGOA==}
+  '@sqlrooms/ui@0.29.0-rc.12':
+    resolution: {integrity: sha512-1bVy00n5nQVdP5OoJpgFYM3IWfuDnt71ScWHKGJZA5ct/dkXr3ITwfJiY3Af/5bBGuFbzA1kdJmz/LPwAxvdUQ==}
     peerDependencies:
       tailwindcss: ^4.1.18
 
-  '@sqlrooms/utils@0.29.0-rc.11':
-    resolution: {integrity: sha512-eFAz7Hnau4QV2cBQy/cCveEz9Ax7F78RiMc/+l3z+omvcY+YFoPX1tSDFIaoB6nRFPLD+mgvGa4dVzqDZNXFsg==}
+  '@sqlrooms/utils@0.29.0-rc.12':
+    resolution: {integrity: sha512-x90YaQ40OKGRBi3gQSj4I7WRLiD8/hX/XLDXKcxcbwT+zvMY3uMpxfDwvEytqvgWh/ilZnbvcbupQ353Qii9vw==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
@@ -6470,7 +6470,7 @@ snapshots:
       - '@luma.gl/shadertools'
       - '@luma.gl/webgl'
 
-  '@deck.gl/geo-layers@8.9.36(df02ddd011c9d87f5a23b746eb3fae40)':
+  '@deck.gl/geo-layers@8.9.36(fad5a4e165435220c7f0fb48e6ab4817)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@deck.gl/core': 8.9.36
@@ -6488,7 +6488,7 @@ snapshots:
       '@loaders.gl/wms': 3.4.15
       '@luma.gl/constants': 8.5.21
       '@luma.gl/core': 8.5.21
-      '@luma.gl/experimental': 8.5.21(@loaders.gl/gltf@4.4.5(@loaders.gl/core@4.4.5))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))
+      '@luma.gl/experimental': 8.5.21(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))
       '@math.gl/core': 3.6.3
       '@math.gl/culling': 3.6.3
       '@math.gl/web-mercator': 3.6.3
@@ -7139,7 +7139,7 @@ snapshots:
       h3-js: 3.7.2
       type-analyzer: 0.4.0
 
-  '@kepler.gl/components@3.2.6(8c85acbbe154499a6f29c74cb5a1291b)':
+  '@kepler.gl/components@3.2.6(29a34026964fff18d062d4c970ee63fa)':
     dependencies:
       '@deck.gl/core': 8.9.36
       '@deck.gl/react': 8.9.36(@deck.gl/core@8.9.36)(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7157,7 +7157,7 @@ snapshots:
       '@kepler.gl/layers': 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@4.1.0)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@16.14.0(react@19.2.8))(typescript@5.9.3)(ws@8.21.3)
       '@kepler.gl/localization': 3.2.6(typescript@5.9.3)
       '@kepler.gl/processors': 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@4.1.0)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@16.14.0(react@19.2.8))(react@18.3.1)(typescript@5.9.3)(ws@8.21.3)
-      '@kepler.gl/reducers': 3.2.6(edef292281a17fe8a8aaaac439faf8cd)
+      '@kepler.gl/reducers': 3.2.6(9d4355b0f8113451844b4c60d2fcb944)
       '@kepler.gl/schemas': 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/core@4.4.5)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@4.1.0)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@16.14.0(react@19.2.8))(react@18.3.1)(typescript@5.9.3)(ws@8.21.3)
       '@kepler.gl/styles': 3.2.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@kepler.gl/table': 3.2.6(@loaders.gl/core@4.4.5)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@16.14.0(react@19.2.8))(react@18.3.1)
@@ -7542,12 +7542,12 @@ snapshots:
       - '@luma.gl/webgl'
       - react-dom
 
-  '@kepler.gl/deckgl-layers@3.2.6(@deck.gl/extensions@9.3.10(@deck.gl/core@9.3.10)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@deck.gl/mesh-layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltf@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@loaders.gl/core@4.4.5)(@loaders.gl/gltf@4.4.5(@loaders.gl/core@4.4.5))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(react-dom@18.3.1(react@18.3.1))':
+  '@kepler.gl/deckgl-layers@3.2.6(@deck.gl/extensions@9.3.10(@deck.gl/core@9.3.10)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@deck.gl/mesh-layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltf@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@loaders.gl/core@4.4.5)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(react-dom@18.3.1(react@18.3.1))':
     dependencies:
       '@danmarshall/deckgl-typings': 4.9.22
       '@deck.gl/aggregation-layers': 8.9.36(@deck.gl/core@8.9.36)(@deck.gl/layers@8.9.36(@deck.gl/core@8.9.36)(@loaders.gl/core@4.4.5)(@luma.gl/core@8.5.21))(@luma.gl/core@8.5.21)
       '@deck.gl/core': 8.9.36
-      '@deck.gl/geo-layers': 8.9.36(df02ddd011c9d87f5a23b746eb3fae40)
+      '@deck.gl/geo-layers': 8.9.36(fad5a4e165435220c7f0fb48e6ab4817)
       '@deck.gl/layers': 8.9.36(@deck.gl/core@8.9.36)(@loaders.gl/core@4.4.5)(@luma.gl/core@8.5.21)
       '@kepler.gl/constants': 3.2.6
       '@kepler.gl/types': 3.2.6
@@ -7580,12 +7580,12 @@ snapshots:
       - '@luma.gl/webgl'
       - react-dom
 
-  '@kepler.gl/deckgl-layers@3.2.6(@deck.gl/extensions@9.3.10(@deck.gl/core@9.3.10)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@deck.gl/mesh-layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltf@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@loaders.gl/core@4.4.5)(@loaders.gl/gltf@4.4.5(@loaders.gl/core@4.4.5))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(react-dom@19.2.8(react@19.2.8))':
+  '@kepler.gl/deckgl-layers@3.2.6(@deck.gl/extensions@9.3.10(@deck.gl/core@9.3.10)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@deck.gl/mesh-layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltf@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@loaders.gl/core@4.4.5)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(react-dom@19.2.8(react@19.2.8))':
     dependencies:
       '@danmarshall/deckgl-typings': 4.9.22
       '@deck.gl/aggregation-layers': 8.9.36(@deck.gl/core@8.9.36)(@deck.gl/layers@8.9.36(@deck.gl/core@8.9.36)(@loaders.gl/core@4.4.5)(@luma.gl/core@8.5.21))(@luma.gl/core@8.5.21)
       '@deck.gl/core': 8.9.36
-      '@deck.gl/geo-layers': 8.9.36(df02ddd011c9d87f5a23b746eb3fae40)
+      '@deck.gl/geo-layers': 8.9.36(fad5a4e165435220c7f0fb48e6ab4817)
       '@deck.gl/layers': 8.9.36(@deck.gl/core@8.9.36)(@loaders.gl/core@4.4.5)(@luma.gl/core@8.5.21)
       '@kepler.gl/constants': 3.2.6
       '@kepler.gl/types': 3.2.6
@@ -8148,14 +8148,14 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@kepler.gl/reducers@3.2.6(8aec6ec3b85138af7bfcedd33ee82f09)':
+  '@kepler.gl/reducers@3.2.6(2948b35d28a74c81fc470444571ed14d)':
     dependencies:
       '@kepler.gl/actions': 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/core@4.4.5)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@3.6.3)(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@19.2.8(react@19.2.8))(react-test-renderer@16.14.0(react@19.2.8))(react@19.2.8)(typescript@5.9.3)(ws@8.21.3)
       '@kepler.gl/cloud-providers': 3.2.6
       '@kepler.gl/common-utils': 3.2.6
       '@kepler.gl/constants': 3.2.6
       '@kepler.gl/deckgl-arrow-layers': 3.2.6(242a42c3b1e15511369a9d5a83bcfb28)
-      '@kepler.gl/deckgl-layers': 3.2.6(@deck.gl/extensions@9.3.10(@deck.gl/core@9.3.10)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@deck.gl/mesh-layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltf@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@loaders.gl/core@4.4.5)(@loaders.gl/gltf@4.4.5(@loaders.gl/core@4.4.5))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(react-dom@19.2.8(react@19.2.8))
+      '@kepler.gl/deckgl-layers': 3.2.6(@deck.gl/extensions@9.3.10(@deck.gl/core@9.3.10)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@deck.gl/mesh-layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltf@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@loaders.gl/core@4.4.5)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(react-dom@19.2.8(react@19.2.8))
       '@kepler.gl/effects': 3.2.6(@loaders.gl/core@4.4.5)(react-dom@19.2.8(react@19.2.8))
       '@kepler.gl/layers': 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@3.6.3)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@19.2.8(react@19.2.8))(react-test-renderer@16.14.0(react@19.2.8))(typescript@5.9.3)(ws@8.21.3)
       '@kepler.gl/localization': 3.2.6(typescript@5.9.3)
@@ -8215,14 +8215,14 @@ snapshots:
       - utf-8-validate
       - ws
 
-  '@kepler.gl/reducers@3.2.6(edef292281a17fe8a8aaaac439faf8cd)':
+  '@kepler.gl/reducers@3.2.6(9d4355b0f8113451844b4c60d2fcb944)':
     dependencies:
       '@kepler.gl/actions': 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/core@4.4.5)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@3.6.3)(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@16.14.0(react@19.2.8))(react@18.3.1)(typescript@5.9.3)(ws@8.21.3)
       '@kepler.gl/cloud-providers': 3.2.6
       '@kepler.gl/common-utils': 3.2.6
       '@kepler.gl/constants': 3.2.6
       '@kepler.gl/deckgl-arrow-layers': 3.2.6(b6c3249a546cf36e317960af05b5cd02)
-      '@kepler.gl/deckgl-layers': 3.2.6(@deck.gl/extensions@9.3.10(@deck.gl/core@9.3.10)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@deck.gl/mesh-layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltf@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@loaders.gl/core@4.4.5)(@loaders.gl/gltf@4.4.5(@loaders.gl/core@4.4.5))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(react-dom@18.3.1(react@18.3.1))
+      '@kepler.gl/deckgl-layers': 3.2.6(@deck.gl/extensions@9.3.10(@deck.gl/core@9.3.10)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@deck.gl/mesh-layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltf@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@loaders.gl/core@4.4.5)(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(react-dom@18.3.1(react@18.3.1))
       '@kepler.gl/effects': 3.2.6(@loaders.gl/core@4.4.5)(react-dom@18.3.1(react@18.3.1))
       '@kepler.gl/layers': 3.2.6(@deck.gl/aggregation-layers@9.3.10(@deck.gl/core@9.3.10)(@deck.gl/layers@9.3.10(@deck.gl/core@9.3.10)(@loaders.gl/core@4.4.5)(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))))(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/core@9.3.6)(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))(@math.gl/core@4.1.0)(@math.gl/web-mercator@3.6.3)(enzyme-adapter-utils@1.14.2(react@19.2.8))(enzyme@3.11.0)(gl-matrix@3.4.4)(react-dom@18.3.1(react@18.3.1))(react-test-renderer@16.14.0(react@19.2.8))(typescript@5.9.3)(ws@8.21.3)
       '@kepler.gl/localization': 3.2.6(typescript@5.9.3)
@@ -9159,6 +9159,18 @@ snapshots:
       '@luma.gl/engine': 9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))
       '@luma.gl/gltools': 8.5.21
       '@luma.gl/shadertools': 8.5.21
+      '@luma.gl/webgl': 9.3.6(@luma.gl/core@9.3.6)
+      '@math.gl/core': 3.6.3
+      earcut: 2.2.4
+
+  '@luma.gl/experimental@8.5.21(@loaders.gl/gltf@3.4.15)(@loaders.gl/images@4.4.5(@loaders.gl/core@4.4.5))(@luma.gl/engine@9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6)))(@luma.gl/gltools@8.5.21)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))(@luma.gl/webgl@9.3.6(@luma.gl/core@9.3.6))':
+    dependencies:
+      '@loaders.gl/gltf': 3.4.15
+      '@loaders.gl/images': 4.4.5(@loaders.gl/core@4.4.5)
+      '@luma.gl/constants': 8.5.21
+      '@luma.gl/engine': 9.3.6(@luma.gl/core@9.3.6)(@luma.gl/shadertools@9.3.6(@luma.gl/core@9.3.6))
+      '@luma.gl/gltools': 8.5.21
+      '@luma.gl/shadertools': 9.3.6(@luma.gl/core@9.3.6)
       '@luma.gl/webgl': 9.3.6(@luma.gl/core@9.3.6)
       '@math.gl/core': 3.6.3
       earcut: 2.2.4
@@ -10241,22 +10253,22 @@ snapshots:
 
   '@sindresorhus/is@4.6.0': {}
 
-  '@sqlrooms/ai-config@0.29.0-rc.11':
+  '@sqlrooms/ai-config@0.29.0-rc.12':
     dependencies:
       zod: 4.4.3
 
-  '@sqlrooms/ai-core@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/ai-core@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
       '@ai-sdk/openai-compatible': 1.0.48(zod@4.4.3)
       '@ai-sdk/react': 3.0.267(react@19.2.8)(zod@4.4.3)
       '@dnd-kit/core': 6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       '@paralleldrive/cuid2': 3.3.0
-      '@sqlrooms/ai-config': 0.29.0-rc.11
-      '@sqlrooms/codemirror': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
-      '@sqlrooms/room-store': 0.29.0-rc.11(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/ui': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
-      '@sqlrooms/utils': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/ai-config': 0.29.0-rc.12
+      '@sqlrooms/codemirror': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/room-store': 0.29.0-rc.12(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/ui': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/utils': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       ai: 6.0.264(zod@4.4.3)
       immer: 11.1.18
       lucide-react: 0.556.0(react@19.2.8)
@@ -10277,13 +10289,13 @@ snapshots:
       - tailwindcss
       - use-sync-external-store
 
-  '@sqlrooms/ai-settings@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/ai-settings@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
-      '@sqlrooms/ai-config': 0.29.0-rc.11
-      '@sqlrooms/ai-core': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/recharts': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
-      '@sqlrooms/room-store': 0.29.0-rc.11(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/ui': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/ai-config': 0.29.0-rc.12
+      '@sqlrooms/ai-core': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/recharts': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/room-store': 0.29.0-rc.12(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/ui': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       immer: 11.1.18
       lucide-react: 0.556.0(react@19.2.8)
       react: 19.2.8
@@ -10296,16 +10308,16 @@ snapshots:
       - tailwindcss
       - use-sync-external-store
 
-  '@sqlrooms/ai@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/ai@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
-      '@sqlrooms/ai-config': 0.29.0-rc.11
-      '@sqlrooms/ai-core': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/ai-settings': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/data-table': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/duckdb': 0.29.0-rc.11(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/duckdb-core': 0.29.0-rc.11(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@sqlrooms/room-shell': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/ui': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/ai-config': 0.29.0-rc.12
+      '@sqlrooms/ai-core': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/ai-settings': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/data-table': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/duckdb': 0.29.0-rc.12(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/duckdb-core': 0.29.0-rc.12(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/room-shell': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/ui': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       ai: 6.0.264(zod@4.4.3)
       apache-arrow: 17.0.0
       immer: 11.1.18
@@ -10324,7 +10336,7 @@ snapshots:
       - tailwindcss
       - use-sync-external-store
 
-  '@sqlrooms/codemirror@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
+  '@sqlrooms/codemirror@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
     dependencies:
       '@codemirror/autocomplete': 6.20.3
       '@codemirror/commands': 6.11.0
@@ -10336,8 +10348,8 @@ snapshots:
       '@codemirror/state': 6.7.1
       '@codemirror/view': 6.43.9
       '@lezer/highlight': 1.2.3
-      '@sqlrooms/ui': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
-      '@sqlrooms/utils': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/ui': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/utils': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       react-markdown: 10.1.0(@types/react@19.2.17)(react@19.2.8)
@@ -10351,12 +10363,12 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@sqlrooms/data-table@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/data-table@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
-      '@sqlrooms/codemirror': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
-      '@sqlrooms/duckdb': 0.29.0-rc.11(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/ui': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
-      '@sqlrooms/utils': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/codemirror': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/duckdb': 0.29.0-rc.12(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/ui': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/utils': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tanstack/react-table': 8.21.3(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tanstack/table-core': 8.21.3
       apache-arrow: 17.0.0
@@ -10370,11 +10382,11 @@ snapshots:
       - tailwindcss
       - use-sync-external-store
 
-  '@sqlrooms/db@0.29.0-rc.11(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/db@0.29.0-rc.12(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
-      '@sqlrooms/duckdb': 0.29.0-rc.11(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/duckdb-core': 0.29.0-rc.11(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@sqlrooms/room-store': 0.29.0-rc.11(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/duckdb': 0.29.0-rc.12(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/duckdb-core': 0.29.0-rc.12(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/room-store': 0.29.0-rc.12(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
       apache-arrow: 17.0.0
       immer: 11.1.18
       zod: 4.4.3
@@ -10384,21 +10396,21 @@ snapshots:
       - react-dom
       - use-sync-external-store
 
-  '@sqlrooms/duckdb-core@0.29.0-rc.11(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@sqlrooms/duckdb-core@0.29.0-rc.12(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@sqlrooms/room-config': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/room-config': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       apache-arrow: 17.0.0
     transitivePeerDependencies:
       - react
       - react-dom
 
-  '@sqlrooms/duckdb@0.29.0-rc.11(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/duckdb@0.29.0-rc.12(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
       '@duckdb/duckdb-wasm': 1.32.0
-      '@sqlrooms/duckdb-core': 0.29.0-rc.11(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@sqlrooms/room-config': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@sqlrooms/room-store': 0.29.0-rc.11(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/utils': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/duckdb-core': 0.29.0-rc.12(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/room-config': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/room-store': 0.29.0-rc.12(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/utils': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       apache-arrow: 17.0.0
       fast-deep-equal: 3.1.3
       immer: 11.1.18
@@ -10410,16 +10422,16 @@ snapshots:
       - react-dom
       - use-sync-external-store
 
-  '@sqlrooms/layout-config@0.29.0-rc.11':
+  '@sqlrooms/layout-config@0.29.0-rc.12':
     dependencies:
       zod: 4.4.3
 
-  '@sqlrooms/layout@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/layout@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@sqlrooms/layout-config': 0.29.0-rc.11
-      '@sqlrooms/room-store': 0.29.0-rc.11(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/ui': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/layout-config': 0.29.0-rc.12
+      '@sqlrooms/room-store': 0.29.0-rc.12(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/ui': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       immer: 11.1.18
       lucide-react: 0.556.0(react@19.2.8)
       react: 19.2.8
@@ -10435,9 +10447,9 @@ snapshots:
       - tailwindcss
       - use-sync-external-store
 
-  '@sqlrooms/recharts@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
+  '@sqlrooms/recharts@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
     dependencies:
-      '@sqlrooms/ui': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/ui': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       recharts: 2.15.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -10446,25 +10458,25 @@ snapshots:
       - '@types/react-dom'
       - tailwindcss
 
-  '@sqlrooms/room-config@0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@sqlrooms/room-config@0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@sqlrooms/layout-config': 0.29.0-rc.11
+      '@sqlrooms/layout-config': 0.29.0-rc.12
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       zod: 4.4.3
 
-  '@sqlrooms/room-shell@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/room-shell@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
-      '@sqlrooms/codemirror': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
-      '@sqlrooms/data-table': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/db': 0.29.0-rc.11(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/duckdb': 0.29.0-rc.11(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/layout': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/layout-config': 0.29.0-rc.11
-      '@sqlrooms/room-config': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@sqlrooms/room-store': 0.29.0-rc.11(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
-      '@sqlrooms/ui': 0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
-      '@sqlrooms/utils': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/codemirror': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/data-table': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/db': 0.29.0-rc.12(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/duckdb': 0.29.0-rc.12(@types/react@19.2.17)(apache-arrow@17.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/layout': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/layout-config': 0.29.0-rc.12
+      '@sqlrooms/room-config': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/room-store': 0.29.0-rc.12(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+      '@sqlrooms/ui': 0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
+      '@sqlrooms/utils': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       apache-arrow: 17.0.0
       immer: 11.1.18
       lucide-react: 0.556.0(react@19.2.8)
@@ -10479,9 +10491,9 @@ snapshots:
       - tailwindcss
       - use-sync-external-store
 
-  '@sqlrooms/room-store@0.29.0-rc.11(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))':
+  '@sqlrooms/room-store@0.29.0-rc.12(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))':
     dependencies:
-      '@sqlrooms/room-config': 0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@sqlrooms/room-config': 0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       immer: 11.1.18
       react: 19.2.8
       zod: 4.4.3
@@ -10491,7 +10503,7 @@ snapshots:
       - react-dom
       - use-sync-external-store
 
-  '@sqlrooms/ui@0.29.0-rc.11(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
+  '@sqlrooms/ui@0.29.0-rc.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@dnd-kit/modifiers': 9.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
@@ -10540,7 +10552,7 @@ snapshots:
       - react
       - react-dom
 
-  '@sqlrooms/utils@0.29.0-rc.11(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@sqlrooms/utils@0.29.0-rc.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       d3-color: 3.1.0
       d3-format: 3.1.2

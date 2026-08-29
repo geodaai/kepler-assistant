@@ -1,9 +1,18 @@
 import React from 'react';
 import {Chat, AiSettingsPanel, useGenerateSessionTitle} from '@sqlrooms/ai';
+import type {
+  ChatActiveStatusProps,
+  ChatActivityProps,
+  ChatReasoningProps,
+  ChatToolActivityProps,
+} from '@sqlrooms/ai-core';
 import {useRoomStore} from '../store';
 import {getEchartsHoistedRenderers} from '../tools/echarts-renderers';
 import {useDisclosure} from '@sqlrooms/ui';
 import {Settings2} from 'lucide-react';
+import {AppChatActions} from './AppChatActions';
+import {AppChatTextOutput} from './AppChatTextOutput';
+import {AppChatTurn} from './AppChatTurn';
 
 // Hoist every registered ECharts renderer. Deriving the list from the
 // renderer registry (rather than hardcoding chart names) makes a registered-
@@ -62,6 +71,36 @@ class ChatErrorBoundary extends React.Component<
   }
 }
 
+/**
+ * Hides the per-turn "Thinking..." reasoning disclosure blocks. Reasoning is
+ * already surfaced live in the active-status line (see
+ * `ShimmeringActiveStatus`), so the collapsed disclosure blocks in the
+ * transcript are redundant noise. Keeps sqlrooms' default `Reasoning` slot
+ * available elsewhere.
+ */
+const HiddenChatReasoning: React.FC<ChatReasoningProps> = () => null;
+
+/**
+ * No `Activity` box in the transcript: tool activity lives in the expandable
+ * `ShimmeringActiveStatus` (its own box), so sqlrooms' `ActivityBox` is not
+ * needed. Returning `null` also drops the per-tool children the box would
+ * otherwise mount.
+ */
+const HiddenChatActivity: React.FC<ChatActivityProps> = () => null;
+
+/**
+ * No per-tool transcript lines: reasoning text and tool states show in the
+ * expandable `ShimmeringActiveStatus`, not as log/summary lines in the turn.
+ */
+const HiddenChatToolActivity: React.FC<ChatToolActivityProps> = () => null;
+
+/**
+ * No separate bottom-of-chat active status: the live `ShimmeringActiveStatus`
+ * line (with its expandable tool box) is rendered inside the running turn's
+ * action row by `AppChatActions` — directly above the copy/fork buttons.
+ */
+const HiddenChatActiveStatus: React.FC<ChatActiveStatusProps> = () => null;
+
 export function MainView() {
   const isDataAvailable = useRoomStore(s => s.room.initialized);
   const currentSessionId = useRoomStore(s => s.ai.config.currentSessionId);
@@ -98,7 +137,19 @@ export function MainView() {
         <div className="grow overflow-auto">
           <ChatErrorBoundary>
             {isDataAvailable ? (
-              <Chat.Messages key={currentSessionId} hoistedRenderers={HOISTED_RENDERERS} />
+              <Chat.Rendering
+                components={{
+                  ActiveStatus: HiddenChatActiveStatus,
+                  Turn: AppChatTurn,
+                  Actions: AppChatActions,
+                  TextOutput: AppChatTextOutput,
+                  Reasoning: HiddenChatReasoning,
+                  Activity: HiddenChatActivity,
+                  ToolActivity: HiddenChatToolActivity,
+                }}
+              >
+                <Chat.Messages key={currentSessionId} hoistedRenderers={HOISTED_RENDERERS} />
+              </Chat.Rendering>
             ) : (
               <div className="flex h-full items-center justify-center text-sm opacity-50">
                 Initializing...
