@@ -47,6 +47,8 @@ import type {KeplerContext} from '../mcp';
  * model-facing `weightsId` back to `weights` before delegating.
  */
 const globalWeightsCache: Record<string, number[][]> = {};
+/** Column name per weightsId (custom `weightsColumnName` overrides the default). */
+const weightsColumnNames: Record<string, string> = {};
 
 /**
  * Discriminated-union input schema for `geoda.analysis`. Each operation carries
@@ -68,7 +70,13 @@ const AnalysisInput = z.discriminatedUnion(
       .optional()
       .describe('Distance threshold for threshold-based weights'),
     isMile: z.boolean().optional(),
-    useCentroids: z.boolean().optional()
+    useCentroids: z.boolean().optional(),
+    weightsColumnName: z
+      .string()
+      .optional()
+      .describe(
+        'Name of the column added to the map dataset holding the neighbor list (row i = neighbor indices of row i). Default "<type>w" (e.g. "queenw").'
+      )
   }),
   z.object({
     analysis: z.literal('lisa'),
@@ -84,7 +92,13 @@ const AnalysisInput = z.discriminatedUnion(
       .optional()
       .describe('Significance threshold for filtering results (default 0.05)'),
     k: z.number().optional().describe('Number of quantiles for quantile LISA'),
-    quantile: z.number().optional().describe('Quantile value for quantile LISA')
+    quantile: z.number().optional().describe('Quantile value for quantile LISA'),
+    clusterColumnName: z
+      .string()
+      .optional()
+      .describe(
+        'Name of the column added to the map dataset holding the LISA cluster indicator (0=not significant, 1=HH, 2=LL, 3=LH, 4=HL). Default "lisa_cluster".'
+      )
   }),
   z.object({
     analysis: z.literal('global-moran'),
@@ -94,6 +108,27 @@ const AnalysisInput = z.discriminatedUnion(
       .string()
       .optional()
       .describe('ID of spatial weights. If not provided, create weights first.')
+  }),
+  z.object({
+    analysis: z.literal('colocation'),
+    datasetName: z.string(),
+    variableName: z.string().describe('Binary (0/1) variable for the local join count'),
+    variableB: z
+      .string()
+      .optional()
+      .describe('Second binary (0/1) variable for the bivariate no-colocation count'),
+    weightsId: z.string().optional().describe('ID of spatial weights to use'),
+    permutation: z.number().optional().describe('Number of permutations (default 999)'),
+    significanceThreshold: z
+      .number()
+      .optional()
+      .describe('Significance threshold for filtering results (default 0.05)'),
+    clusterColumnName: z
+      .string()
+      .optional()
+      .describe(
+        'Name of the column added to the map dataset holding the colocation cluster indicator. Default "lisa_cluster".'
+      )
   }),
   z.object({
     analysis: z.literal('regression'),
@@ -183,9 +218,41 @@ const AnalysisInput = z.discriminatedUnion(
   }
 );
 
-/** Resolve a `weightsId` to the engine's neighbor list, or undefined. */
-function getCachedWeights(weightsId?: string): number[][] | undefined {
-  return weightsId ? globalWeightsCache[weightsId] : undefined;
+/** Default column name for a weightsId (`<datasetName>-<type>` → `<type>w`). */
+function defaultWeightsColumnName(weightsId: string): string | undefined {
+  const dash = weightsId.lastIndexOf('-');
+  if (dash === -1) return undefined;
+  const type = weightsId.slice(dash + 1);
+  return type ? `${type}w` : undefined;
+}
+
+/**
+ * Resolve a `weightsId` to the engine's neighbor list. The in-memory cache
+ * (populated by the last `spatial-weights` call) is the fast path; on a miss
+ * the persisted `<type>w` column in the map dataset is read back so the saved
+ * weights survive across turns / sessions.
+ */
+async function resolveWeights(
+  ctx: KeplerContext,
+  weightsId: string | undefined,
+  datasetName: string | undefined
+): Promise<number[][] | undefined> {
+  if (!weightsId) return undefined;
+  const cached = globalWeightsCache[weightsId];
+  if (cached) return cached;
+  const columnName = weightsColumnNames[weightsId] ?? defaultWeightsColumnName(weightsId);
+  if (datasetName && columnName) {
+    try {
+      const values = ctx.getValuesFromDataset(datasetName, columnName);
+      if (Array.isArray(values) && values.length && Array.isArray(values[0])) {
+        return values as number[][];
+      }
+    } catch {
+      // Column not present (e.g. weights created in a different session with a
+      // custom name) — the caller reports the "create weights first" error.
+    }
+  }
+  return undefined;
 }
 
 /** Shape the engine result for the model / harness per operation. */
@@ -194,7 +261,12 @@ function shapeOutput(analysis: string, data: Record<string, any>): Record<string
     case 'spatial-weights':
       // The neighbor list is cached for follow-up ops; the model sees the
       // weightsId + meta, not the raw matrix.
-      return {weightsId: data.weightsId, weightsMeta: data.weightsMeta, details: data.details};
+      return {
+        weightsId: data.weightsId,
+        weightsMeta: data.weightsMeta,
+        weightsColumnName: data.weightsColumnName,
+        details: data.details
+      };
     case 'lisa': {
       // Back-compat fields the old command computed: globalMoranI (localMoran
       // only) and the significance threshold.
@@ -207,6 +279,7 @@ function shapeOutput(analysis: string, data: Record<string, any>): Record<string
         datasetName: data.datasetName,
         variableName: data.variableName,
         method: data.method,
+        clusterColumnName: data.clusterColumnName,
         significanceThreshold: data.significanceThreshold ?? 0.05,
         clusterColorAndLabels: data.clusterColorAndLabels,
         totalObservations: data.totalObservations,
@@ -220,6 +293,15 @@ function shapeOutput(analysis: string, data: Record<string, any>): Record<string
         datasetName: data.datasetName,
         variableName: data.variableName,
         totalObservations: data.totalObservations
+      };
+    case 'colocation':
+      return {
+        type: data.type,
+        variables: data.variables,
+        clusterColumnName: data.clusterColumnName,
+        clusterColorAndLabels: data.clusterColorAndLabels,
+        totalObservations: data.totalObservations,
+        details: data.details
       };
     case 'regression':
       // Keep the old `result` aggregate key the model relied on.
@@ -264,7 +346,7 @@ function shapeOutput(analysis: string, data: Record<string, any>): Record<string
   }
 }
 
-export function getGeodaAnalysisCommand(_ctx: KeplerContext): RoomCommand {
+export function getGeodaAnalysisCommand(ctx: KeplerContext): RoomCommand {
   return {
     id: 'geoda.analysis',
     name: 'GeoDa spatial analysis',
@@ -287,10 +369,12 @@ export function getGeodaAnalysisCommand(_ctx: KeplerContext): RoomCommand {
           };
         }
 
-        // Resolve weightsId → neighbor list for the ops that consume one.
+        // Resolve weightsId → neighbor list for the ops that consume one. The
+        // in-memory cache is the fast path; the persisted `<type>w` column in
+        // the map dataset is the durable fallback (survives across turns).
         const engineArgs: Record<string, unknown> = {...(args as Record<string, unknown>)};
         if (['lisa', 'global-moran'].includes(args.analysis) && args.analysis) {
-          const weights = getCachedWeights((args as {weightsId?: string}).weightsId);
+          const weights = await resolveWeights(ctx, (args as {weightsId?: string}).weightsId, args.datasetName);
           if (!weights) {
             return {
               success: false,
@@ -302,7 +386,7 @@ export function getGeodaAnalysisCommand(_ctx: KeplerContext): RoomCommand {
           engineArgs.weights = weights;
         } else if (args.analysis === 'regression') {
           if (args.weightsId) {
-            const weights = getCachedWeights(args.weightsId);
+            const weights = await resolveWeights(ctx, args.weightsId, args.datasetName);
             if (!weights) {
               return {
                 success: false,
@@ -328,9 +412,11 @@ export function getGeodaAnalysisCommand(_ctx: KeplerContext): RoomCommand {
         const data = (result.data ?? {}) as Record<string, any>;
 
         // Cache the neighbor list the engine just built so follow-up ops can
-        // resolve the returned weightsId.
+        // resolve the returned weightsId (the persisted `<type>w` column is the
+        // durable fallback when this cache is cold).
         if (args.analysis === 'spatial-weights' && Array.isArray(data.weights)) {
           globalWeightsCache[data.weightsId] = data.weights;
+          if (data.weightsColumnName) weightsColumnNames[data.weightsId] = data.weightsColumnName;
         }
 
         return {

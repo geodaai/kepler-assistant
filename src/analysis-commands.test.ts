@@ -195,6 +195,98 @@ describe('AnalysisEngine', () => {
     expect(data.totalObservations).toBe(4);
   });
 
+  it('geoda.analysis lisa writes the cluster column back to the map dataset', async () => {
+    // Regression: the LISA op computed clusters but never persisted them, so the
+    // kepler skill could not find a cluster column to color a local Moran map
+    // by. With a bridge present it must append the cluster column in place.
+    const connector = createMockConnector();
+    const added: Array<{datasetName: string; columnName: string; values: unknown[]}> = [];
+    const bridge = {
+      addColumnToDataset: async (datasetName: string, columnName: string, values: unknown[]) => {
+        added.push({datasetName, columnName, values});
+      }
+    };
+    const analysis = new AnalysisEngine(connector, bridge as any);
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'lisa', datasetName: 'sales', variableName: 'amount',
+      method: 'localMoran', weights: NEIGHBORS, permutation: 99, significanceThreshold: 0.05
+    });
+    expect(res.success).toBe(true);
+    expect(added).toHaveLength(1);
+    expect(added[0].datasetName).toBe('sales');
+    expect(added[0].columnName).toBe('lisa_cluster');
+    // One cluster value per observation, aligned with the dataset rows.
+    expect(added[0].values).toHaveLength(4);
+    const data = res.data as {clusterColumnName?: string; clusters?: unknown[]};
+    expect(data.clusterColumnName).toBe('lisa_cluster');
+    expect(Array.isArray(data.clusters)).toBe(true);
+  });
+
+  it('geoda.analysis lisa honors a custom clusterColumnName', async () => {
+    const connector = createMockConnector();
+    const added: Array<{columnName: string}> = [];
+    const bridge = {
+      addColumnToDataset: async (_datasetName: string, columnName: string) => {
+        added.push({columnName});
+      }
+    };
+    const analysis = new AnalysisEngine(connector, bridge as any);
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'lisa', datasetName: 'sales', variableName: 'amount',
+      method: 'localMoran', weights: NEIGHBORS, permutation: 99,
+      clusterColumnName: 'lisa_cluster_donatns'
+    });
+    expect(res.success).toBe(true);
+    expect(added).toHaveLength(1);
+    expect(added[0].columnName).toBe('lisa_cluster_donatns');
+  });
+
+  it('geoda.analysis colocation writes the cluster column back to the map dataset', async () => {
+    // Regression: like LISA, colocation computed clusters but never persisted
+    // them, so the kepler skill could not find a cluster column to color a
+    // colocation map by. With a bridge present it must append the cluster
+    // column in place.
+    const connector = createMockConnector();
+    const added: Array<{datasetName: string; columnName: string; values: unknown[]}> = [];
+    const bridge = {
+      addColumnToDataset: async (datasetName: string, columnName: string, values: unknown[]) => {
+        added.push({datasetName, columnName, values});
+      }
+    };
+    const analysis = new AnalysisEngine(connector, bridge as any);
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'colocation', datasetName: 'bins', variableName: 'binFlag',
+      weights: NEIGHBORS, permutation: 99
+    });
+    expect(res.success).toBe(true);
+    expect(added).toHaveLength(1);
+    expect(added[0].datasetName).toBe('bins');
+    expect(added[0].columnName).toBe('lisa_cluster');
+    // One cluster value per observation, aligned with the dataset rows.
+    expect(added[0].values).toHaveLength(4);
+    const data = res.data as {clusterColumnName?: string; type?: string};
+    expect(data.clusterColumnName).toBe('lisa_cluster');
+    expect(data.type).toBe('univariate-local-joincount');
+  });
+
+  it('geoda.analysis colocation honors a custom clusterColumnName', async () => {
+    const connector = createMockConnector();
+    const added: Array<{columnName: string}> = [];
+    const bridge = {
+      addColumnToDataset: async (_datasetName: string, columnName: string) => {
+        added.push({columnName});
+      }
+    };
+    const analysis = new AnalysisEngine(connector, bridge as any);
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'colocation', datasetName: 'bins', variableName: 'binFlag',
+      weights: NEIGHBORS, permutation: 99, clusterColumnName: 'coloc_cluster'
+    });
+    expect(res.success).toBe(true);
+    expect(added).toHaveLength(1);
+    expect(added[0].columnName).toBe('coloc_cluster');
+  });
+
   it('geoda.analysis global-moran', async () => {
     const analysis = makeEngine();
     const res = await analysis.invoke('geoda.analysis', {
@@ -251,6 +343,53 @@ describe('AnalysisEngine', () => {
     expect(data.weightsId).toBeDefined();
     expect(Array.isArray(data.weights)).toBe(true);
     expect(data.weights?.[0]).toHaveLength(3);
+  });
+
+  it('geoda.analysis spatial-weights writes the neighbor list column back to the map dataset', async () => {
+    // Regression: spatial weights were only cached in memory (session-scoped), so
+    // the neighbor list never showed up in the map dataset. With a bridge present
+    // it must append a `<type>w` column holding, per row, the neighbor indices of
+    // that row (e.g. row 0 → [1, 2, 3]).
+    const connector = createMockConnector();
+    const added: Array<{datasetName: string; columnName: string; values: unknown[]}> = [];
+    const bridge = {
+      getGeometries: async () => [square(0, 0), square(1, 0), square(0, 1), square(1, 1)],
+      addColumnToDataset: async (datasetName: string, columnName: string, values: unknown[]) => {
+        added.push({datasetName, columnName, values});
+      }
+    };
+    const analysis = new AnalysisEngine(connector, bridge as any);
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'spatial-weights', datasetName: 'sales', type: 'queen'
+    });
+    expect(res.success).toBe(true);
+    expect(added).toHaveLength(1);
+    expect(added[0].datasetName).toBe('sales');
+    expect(added[0].columnName).toBe('queenw');
+    // One neighbor list per observation, aligned with the dataset rows.
+    expect(added[0].values).toHaveLength(4);
+    expect(added[0].values[0]).toEqual([1, 2, 3]);
+    const data = res.data as {weightsId?: string; weightsColumnName?: string};
+    expect(data.weightsColumnName).toBe('queenw');
+  });
+
+  it('geoda.analysis spatial-weights honors a custom weightsColumnName', async () => {
+    const connector = createMockConnector();
+    const added: Array<{columnName: string}> = [];
+    const bridge = {
+      getGeometries: async () => [square(0, 0), square(1, 0), square(0, 1), square(1, 1)],
+      addColumnToDataset: async (_datasetName: string, columnName: string) => {
+        added.push({columnName});
+      }
+    };
+    const analysis = new AnalysisEngine(connector, bridge as any);
+    const res = await analysis.invoke('geoda.analysis', {
+      analysis: 'spatial-weights', datasetName: 'sales', type: 'queen',
+      weightsColumnName: 'w_neighbors'
+    });
+    expect(res.success).toBe(true);
+    expect(added).toHaveLength(1);
+    expect(added[0].columnName).toBe('w_neighbors');
   });
 
   it('geoda.analysis standardize', async () => {

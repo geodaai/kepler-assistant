@@ -622,7 +622,8 @@ export class AnalysisEngine {
       precisionThreshold,
       distanceThreshold,
       isMile,
-      useCentroids
+      useCentroids,
+      weightsColumnName
     } = args;
     const geometries = await this.resolveGeometries(args);
     if (!Array.isArray(geometries) || !geometries.length) {
@@ -645,15 +646,25 @@ export class AnalysisEngine {
       geometries
     });
     const weightsId = `${datasetName ?? 'dataset'}-${type}`;
-    return {
-      success: true,
-      data: {
-        weightsId,
-        weights: w.weights,
-        weightsMeta: w.weightsMeta,
-        details: `Weights created using ${type} for ${datasetName ?? 'dataset'}. weightsId: ${weightsId}`
-      }
+    const data: Record<string, unknown> = {
+      weightsId,
+      weights: w.weights,
+      weightsMeta: w.weightsMeta,
+      details: `Weights created using ${type} for ${datasetName ?? 'dataset'}. weightsId: ${weightsId}`
     };
+    // Persist the neighbor list as a column in the map dataset so the weights
+    // are visible in the data table (mirrors the LISA/colocation write-back).
+    // `weights[i]` is the neighbor index list for dataset row i (geometries
+    // come from the layer data, one per row in order). No-op without a bridge
+    // (MCP/service path) or when geometries were passed explicitly (no dataset
+    // alignment to trust).
+    if (datasetName && this.bridge?.addColumnToDataset && !Array.isArray(args.geometries)) {
+      const columnName = weightsColumnName ?? `${type}w`;
+      await this.bridge.addColumnToDataset(datasetName, columnName, w.weights as number[][]);
+      data.weightsColumnName = columnName;
+      data.details = `Weights created using ${type} for ${datasetName}. weightsId: ${weightsId}. Column "${columnName}" added to dataset "${datasetName}" (row i holds the neighbor indices of row i).`;
+    }
+    return {success: true, data};
   }
 
   private async geodaRegression(args: Record<string, any>): Promise<ToolResult> {
@@ -718,15 +729,22 @@ export class AnalysisEngine {
   }
 
   private async geodaLisa(args: Record<string, any>): Promise<ToolResult> {
-    const {datasetName, variableName, method = 'localMoran', weights, permutation = 999, significanceThreshold = 0.05} =
-      args;
+    const {
+      datasetName,
+      variableName,
+      method = 'localMoran',
+      weights,
+      permutation = 999,
+      significanceThreshold = 0.05,
+      clusterColumnName = 'lisa_cluster'
+    } = args;
     if (!datasetName || !variableName || !Array.isArray(weights)) {
       return {
         success: false,
         error: 'geoda.analysis lisa requires {datasetName, variableName, weights} (weights = neighbor list)'
       };
     }
-    const values = await this.columnValues(datasetName, variableName);
+    const {values, indices, total} = await this.columnValuesWithIndices(datasetName, variableName);
     const opts = {data: values, neighbors: weights, permutation, significanceCutoff: significanceThreshold};
     const lm = method === 'localGeary' ? await geodaLocalGeary(opts) : await geodaLocalMoran(opts);
     const labels = lm.labels as string[];
@@ -736,23 +754,39 @@ export class AnalysisEngine {
       color: (lm.colors as string[])[i],
       numberOfObservations: (lm.clusters as number[]).filter(c => c === i).length
     }));
-    return {
-      success: true,
-      data: {
-        datasetName,
-        variableName,
-        method,
-        lisaValues: lm.lisaValues,
-        pValues: lm.pValues,
-        clusters: lm.clusters,
-        clusterColorAndLabels,
-        totalObservations: values.length,
-        details: `LISA (${method}) completed for ${variableName}. ${clusterColorAndLabels
-          .filter(c => c.numberOfObservations > 0)
-          .map(c => `${c.label}: ${c.numberOfObservations}`)
-          .join(', ')}`
-      }
+    // Persist the cluster column to the map dataset so the clusters can be
+    // visualized (mirrors the rate/standardize write-back). No-op without a
+    // bridge (MCP/service path). `clusters` is aligned with the finite
+    // `values`; re-expand to the full dataset row length so rows whose value
+    // was non-finite (null / empty / non-numeric) get `null` and the column
+    // stays aligned with the dataset on the map.
+    const data: Record<string, unknown> = {
+      datasetName,
+      variableName,
+      method,
+      lisaValues: lm.lisaValues,
+      pValues: lm.pValues,
+      clusters: lm.clusters,
+      clusterColorAndLabels,
+      totalObservations: values.length,
+      details: `LISA (${method}) completed for ${variableName}. ${clusterColorAndLabels
+        .filter(c => c.numberOfObservations > 0)
+        .map(c => `${c.label}: ${c.numberOfObservations}`)
+        .join(', ')}`
     };
+    if (this.bridge?.addColumnToDataset) {
+      await this.bridge.addColumnToDataset(
+        datasetName,
+        clusterColumnName,
+        expandToRows(lm.clusters as number[], indices, total)
+      );
+      data.clusterColumnName = clusterColumnName;
+      data.details = `LISA (${method}) completed for ${variableName}. Cluster column "${clusterColumnName}" added to dataset "${datasetName}". ${clusterColorAndLabels
+        .filter(c => c.numberOfObservations > 0)
+        .map(c => `${c.label}: ${c.numberOfObservations}`)
+        .join(', ')}`;
+    }
+    return {success: true, data};
   }
 
   private async geodaGlobalMoran(args: Record<string, any>): Promise<ToolResult> {
@@ -789,8 +823,15 @@ export class AnalysisEngine {
   }
 
   private async geodaColocation(args: Record<string, any>): Promise<ToolResult> {
-    const {datasetName, variableName, variableB, weights, permutation = 999, significanceThreshold = 0.05} =
-      args;
+    const {
+      datasetName,
+      variableName,
+      variableB,
+      weights,
+      permutation = 999,
+      significanceThreshold = 0.05,
+      clusterColumnName = 'lisa_cluster'
+    } = args;
     if (!datasetName || !variableName || !Array.isArray(weights)) {
       return {
         success: false,
@@ -800,14 +841,14 @@ export class AnalysisEngine {
     // Local Join Count is a binary (0/1) statistic: `variableB` omitted → the
     // univariate colocation count; `variableB` present → the bivariate
     // no-colocation count (the two variables must never both be 1).
-    const a = await this.columnValues(datasetName, variableName);
+    const a = await this.columnValuesWithIndices(datasetName, variableName);
     const opts = {neighbors: weights, permutation, significanceCutoff: significanceThreshold};
     let result: Record<string, any>;
     if (variableB) {
       const b = await this.columnValues(datasetName, variableB);
-      result = await geodaLocalBiJoinCount({data: [a, b], ...opts});
+      result = await geodaLocalBiJoinCount({data: [a.values, b], ...opts});
     } else {
-      result = await geodaLocalJoinCount({data: a, ...opts});
+      result = await geodaLocalJoinCount({data: a.values, ...opts});
     }
     const labels = result.labels as string[];
     const clusterColorAndLabels = labels.map((label, i) => ({
@@ -817,19 +858,33 @@ export class AnalysisEngine {
       numberOfObservations: (result.clusters as number[]).filter(c => c === i).length
     }));
     const variables = variableB ? [variableName, variableB] : [variableName];
-    return {
-      success: true,
-      data: {
-        type: variableB ? 'bivariate-local-joincount' : 'univariate-local-joincount',
-        variables,
-        clusterColorAndLabels,
-        totalObservations: a.length,
-        details: `Local join count (${variables.join(' & ')}) completed. ${clusterColorAndLabels
-          .filter(c => c.numberOfObservations > 0)
-          .map(c => `${c.label}: ${c.numberOfObservations}`)
-          .join(', ')}`
-      }
+    const data: Record<string, unknown> = {
+      type: variableB ? 'bivariate-local-joincount' : 'univariate-local-joincount',
+      variables,
+      clusterColorAndLabels,
+      totalObservations: a.values.length,
+      details: `Local join count (${variables.join(' & ')}) completed. ${clusterColorAndLabels
+        .filter(c => c.numberOfObservations > 0)
+        .map(c => `${c.label}: ${c.numberOfObservations}`)
+        .join(', ')}`
     };
+    // Persist the cluster column to the map dataset so the colocation clusters
+    // can be visualized (mirrors the LISA write-back). No-op without a bridge
+    // (MCP/service path). Re-expand to the full dataset row length so rows
+    // whose value was non-finite get `null` and the column stays aligned.
+    if (this.bridge?.addColumnToDataset) {
+      await this.bridge.addColumnToDataset(
+        datasetName,
+        clusterColumnName,
+        expandToRows(result.clusters as number[], a.indices, a.total)
+      );
+      data.clusterColumnName = clusterColumnName;
+      data.details = `Local join count (${variables.join(' & ')}) completed. Cluster column "${clusterColumnName}" added to dataset "${datasetName}". ${clusterColorAndLabels
+        .filter(c => c.numberOfObservations > 0)
+        .map(c => `${c.label}: ${c.numberOfObservations}`)
+        .join(', ')}`;
+    }
+    return {success: true, data};
   }
 
   private async geoGrid(args: Record<string, any>): Promise<ToolResult> {
@@ -1078,7 +1133,7 @@ export class AnalysisEngine {
   private async columnValuesWithIndices(
     table: string,
     column: string
-  ): Promise<{values: number[]; indices: number[]}> {
+  ): Promise<{values: number[]; indices: number[]; total: number}> {
     const result = await this.db.queryAll(`SELECT ${q(column)} AS _v FROM ${q(table)}`);
     const values: number[] = [];
     const indices: number[] = [];
@@ -1088,7 +1143,7 @@ export class AnalysisEngine {
       values.push(Number(raw));
       indices.push(i);
     });
-    return {values, indices};
+    return {values, indices, total: result.rows.length};
   }
 }
 
@@ -1098,6 +1153,20 @@ export class AnalysisEngine {
  */
 function q(ident: string): string {
   return `"${String(ident).replace(/"/g, '""')}"`;
+}
+
+/**
+ * Re-expand a per-observation result array (aligned with the finite values
+ * returned by `columnValuesWithIndices`) to the full dataset row length, so a
+ * column written back to the map stays aligned with the dataset's rows. Rows
+ * whose value was non-finite (null / empty / non-numeric) get `null`.
+ */
+function expandToRows(values: number[], indices: number[], total: number): Array<number | null> {
+  const out: Array<number | null> = new Array(total).fill(null);
+  indices.forEach((rowIdx, i) => {
+    out[rowIdx] = values[i];
+  });
+  return out;
 }
 
 function buildCondition(c: {column: string; op: string; value?: unknown}): string {
