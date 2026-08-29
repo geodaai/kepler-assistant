@@ -10,21 +10,15 @@ export const PROVIDER_DEFAULT_BASE_URLS: Record<string, string> = {
 };
 
 export const LLM_MODELS = [
-  {name: 'openai', models: ['gpt-5.2', 'gpt-5']},
-  {name: 'anthropic', models: ['claude-3-5-sonnet', 'claude-3-5-haiku']},
+  {name: 'openai', models: ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna']},
+  {name: 'anthropic', models: ['claude-opus-5', 'claude-sonnet-5']},
   {
     name: 'google',
-    models: [
-      'gemini-2.0-pro-exp-02-05',
-      'gemini-2.0-flash',
-      'gemini-2.0-flash-lite',
-      'gemini-1.5-pro',
-      'gemini-1.5-flash'
-    ]
+    models: ['gemini-3.1-pro-preview', 'gemini-3.7-flash', 'gemini-3.5-flash-lite']
   },
-  {name: 'deepseek', models: ['deepseek-chat']},
-  {name: 'xai', models: ['grok-3-mini']},
-  {name: 'ollama', models: ['deepseek-v4-flash:cloud', 'qwen3:32b', 'gpt-oss']}
+  {name: 'deepseek', models: ['deepseek-v4-flash', 'deepseek-v4-pro']},
+  {name: 'xai', models: ['grok-4.6']},
+  {name: 'ollama', models: ['deepseek-v4-flash:cloud', 'qwen3.6:27b', 'gpt-oss:20b']}
 ];
 
 export const AI_SETTINGS = {

@@ -20,7 +20,7 @@ export function getModel(store: StoreApi<AiSliceState>): LanguageModel {
   const state = store.getState();
   const currentSession = state.ai.getCurrentSession();
   const provider = currentSession?.modelProvider || 'openai';
-  const modelId = currentSession?.model || 'gpt-5';
+  const modelId = currentSession?.model || 'gpt-5.6-sol';
 
   return createOpenAICompatible({
     apiKey: state.ai.getApiKeyFromSettings(),
