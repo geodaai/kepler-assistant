@@ -35,16 +35,16 @@ import {getEchartsToolRenderers, setChartSelectionHandler} from './tools/echarts
 import {
   highlightRows,
   setStoreConnectorProvider,
-  getValuesFromDataset,
   getDatasetContext,
   getConnector
 } from './glue/utils';
+import {getValuesFromDataset} from '@kepler.gl/mcp';
 import {loadTableToKepler} from './glue/duckdb-cache';
 import {loadTableIntoDuckDB} from './commands/query-commands';
 import {createWrappedQueryTool} from './tools/query-tool-wrapper';
 import {getAllCommands, KEPLER_COMMAND_OWNER} from './commands';
 import {layerSetIsValid} from '@kepler.gl/actions';
-import type {KeplerContext, KeplerStateAccessors, VisState} from './mcp';
+import type {KeplerContext, KeplerStateAccessors, VisState} from '@kepler.gl/mcp';
 import type {SkillListing} from '@sqlrooms/ai';
 import {createRegistryChatSurface} from './mcp/chat-surface';
 

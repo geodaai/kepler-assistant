@@ -1,6 +1,6 @@
 import type {RoomCommand} from '@sqlrooms/room-store';
-import {getKeplerCommands} from '../mcp';
-import type {KeplerContext} from '../mcp';
+import {getKeplerCommands} from '@kepler.gl/mcp';
+import type {KeplerContext} from '@kepler.gl/mcp';
 import {getGeoCommands} from './geo-commands';
 import {getGeodaAnalysisCommand} from './geoda-analysis-command';
 import {getQueryCommands} from './query-commands';
@@ -13,10 +13,10 @@ import {getRunSqlCommand} from './run-sql-command';
  * keyed by command id. Intended for registry registration via
  * `registerCommandsForOwner(store, KEPLER_COMMAND_OWNER, Object.values(...))`.
  *
- * The `map.*` commands come from the vendored map surface at `../mcp`
- * (temporarily integrated from the kepler.gl `@kepler.gl/mcp` module); the
- * analysis shims (`data.*`, `geo.*`, `geoda.*`, `chart.*`) live here and
- * delegate compute to the shared `AnalysisEngine`.
+ * The `map.*` commands come from the published `@kepler.gl/mcp` map surface
+ * (owned by the kepler.gl monorepo); the analysis shims (`data.*`, `geo.*`,
+ * `geoda.*`, `chart.*`) live here and delegate compute to the shared
+ * `AnalysisEngine`.
  *
  * Chart commands (`chart.*`) are routed through `executeApi` like every other
  * command. The histogram renderer dispatches on `commandId` rather than tool
@@ -35,7 +35,7 @@ export function getAllCommands(ctx: KeplerContext): Record<string, RoomCommand> 
   };
 }
 
-export {getKeplerCommands, KEPLER_COMMAND_OWNER} from '../mcp';
+export {getKeplerCommands, KEPLER_COMMAND_OWNER} from '@kepler.gl/mcp';
 export {getGeoCommands} from './geo-commands';
 export {getGeodaAnalysisCommand} from './geoda-analysis-command';
 export {getQueryCommands} from './query-commands';

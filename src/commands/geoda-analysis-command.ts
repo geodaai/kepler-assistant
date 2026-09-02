@@ -38,7 +38,7 @@
 import type {RoomCommand} from '@sqlrooms/room-store';
 import {z} from 'zod';
 import {runAnalysis} from '../analysis';
-import type {KeplerContext} from '../mcp';
+import type {KeplerContext} from '@kepler.gl/mcp';
 
 /**
  * Neighbor lists returned by the engine's `spatial-weights`, cached by the
