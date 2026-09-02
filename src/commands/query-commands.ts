@@ -4,15 +4,17 @@ import {z} from 'zod';
 import {tableFromArrays, Table as ArrowTable} from 'apache-arrow';
 import {addDataToMap} from '@kepler.gl/actions';
 import {processFileData} from '@kepler.gl/processors';
-import type {KeplerContext} from '../mcp';
+import type {KeplerContext} from '@kepler.gl/mcp';
+import {
+  getConnector
+} from '../glue/utils';
 import {
   getValuesFromDataset,
-  getConnector,
   datasetNameToTableName,
   convertArrowRowToObject,
   tableToLLMResult,
   stringifyObjectColumn
-} from '../glue/utils';
+} from '@kepler.gl/mcp';
 import {saveToDuckdb, tableExists} from '../glue/duckdb-cache';
 import {runAnalysis} from '../analysis';
 

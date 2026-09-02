@@ -2,13 +2,15 @@ import {describe, expect, it, afterEach, vi} from 'vitest';
 import {tableFromArrays} from 'apache-arrow';
 import {
   ensureKeplerDatasetsMaterialized,
-  setStoreConnectorProvider,
+  setStoreConnectorProvider
+} from './utils';
+import {
   buildAddColumnPayload,
   arrowTableToObjects,
   isObjectColumn,
   stringifyObjectColumn,
   restoreObjectColumns
-} from './utils';
+} from '@kepler.gl/mcp';
 import {createMockConnector} from '../mock-connector';
 
 // `utils.ts` imports `createWasmDuckDbConnector` from `@sqlrooms/duckdb` at

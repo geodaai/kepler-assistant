@@ -2,9 +2,10 @@ import {FeatureCollection} from 'geojson';
 import {tableFromArrays} from 'apache-arrow';
 import {addDataToMap} from '@kepler.gl/actions';
 import {processFileData} from '@kepler.gl/processors';
-import {getConnector, arrowTableToObjects, datasetNameToTableName} from './utils';
+import {getConnector} from './utils';
+import {arrowTableToObjects, datasetNameToTableName} from '@kepler.gl/mcp';
 import type {DuckDbConnector} from '@sqlrooms/duckdb';
-import type {KeplerContext} from '../mcp';
+import type {KeplerContext} from '@kepler.gl/mcp';
 
 let _cachedTableContext = '';
 

@@ -26,11 +26,13 @@ import {tool} from '../chat';
 import {z} from 'zod';
 import {
   getConnector,
+  ensureKeplerDatasetsMaterialized
+} from '../glue/utils';
+import {
   formatResultsForLLM,
-  ensureKeplerDatasetsMaterialized,
   NUMBER_OF_ROWS_RETURN_TO_LLM,
   LLM_PREVIEW_MAX_TOTAL_LENGTH
-} from '../glue/utils';
+} from '@kepler.gl/mcp';
 
 export const QueryToolParameters = z.object({
   // The `type` field is a discriminator the model sometimes hallucinates as

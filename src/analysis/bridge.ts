@@ -17,14 +17,16 @@
 import type {KeplerBridge} from '../kepler-bridge';
 import {tableFromArrays} from 'apache-arrow';
 import {updateDataset} from '@kepler.gl/actions';
-import type {KeplerContext} from '../mcp';
+import type {KeplerContext} from '@kepler.gl/mcp';
 import {
   getValuesFromDataset,
-  getGeometriesFromDataset,
   datasetNameToTableName,
-  getConnector,
-  ensureSpatialExtension,
   buildAddColumnPayload
+} from '@kepler.gl/mcp';
+import {
+  getGeometriesFromDataset,
+  getConnector,
+  ensureSpatialExtension
 } from '../glue/utils';
 import {
   saveToDuckdb,

@@ -3,11 +3,10 @@
  * Bundle built-in skills from real files on disk into a TypeScript module.
  *
  * Sources:
- *  - the `kepler` skill comes from the map surface **vendored** at
- *    `src/mcp/skill/kepler/` (temporarily integrated from the kepler.gl
- *    `@kepler.gl/mcp` module, which permanently owns the map commands). This
- *    repo's harness-specific notes (`scripts/kepler-skill.harness.md`) are
- *    appended to its SKILL.md.
+ *  - the `kepler` skill comes from the installed `@kepler.gl/mcp` package's
+ *    `skill/kepler/` (the kepler.gl module that permanently owns the map
+ *    commands). This repo's harness-specific notes
+ *    (`scripts/kepler-skill.harness.md`) are appended to its SKILL.md.
  *  - the `geoda-analysis` skill is **sourced** from the @geoda/* library repo
  *    (`geoda-lib/skills/geoda-analysis`) so the harness-agnostic analysis
  *    skill lives in one place. This host's command surface
@@ -26,9 +25,11 @@
 
 import {existsSync, readdirSync, readFileSync, writeFileSync, statSync} from 'node:fs';
 import {join, dirname} from 'node:path';
+import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const requireFromScript = createRequire(import.meta.url);
 const ROOT = join(__dirname, '..');
 const SKILLS_DIR = join(ROOT, 'skills/built-in');
 const OUTPUT = join(ROOT, 'src/chat/bundledSkills.ts');
@@ -44,10 +45,35 @@ const GEODA_SKILL_DIR =
   process.env.GEODA_SKILL_DIR || join(ROOT, '../geoda-lib/skills/geoda-analysis');
 
 /**
- * The vendored map-surface skill, temporarily integrated from the kepler.gl
- * `@kepler.gl/mcp` module. See NEXT_PLAN.md for the permanent separation.
+ * The `kepler` map surface skill now ships with the `@kepler.gl/mcp` package
+ * at `skill/kepler` (the map-surface separation moved it out of this repo —
+ * see NEXT_PLAN.md). The package's `exports` map does not include
+ * `./package.json`, so resolve its main entry (dist/cjs/index.js — the
+ * `require` condition) and walk up to the package root instead of resolving the
+ * subpath directly. Works whether the dependency is a `file:` workspace symlink
+ * (local dev) or a regular installed copy (published).
  */
-const MCP_SKILL_DIR = join(ROOT, 'src/mcp/skill/kepler');
+function resolveMcpSkillDir() {
+  let dir = dirname(requireFromScript.resolve('@kepler.gl/mcp'));
+  for (;;) {
+    const pkgJson = join(dir, 'package.json');
+    if (existsSync(pkgJson)) {
+      try {
+        if (JSON.parse(readFileSync(pkgJson, 'utf8')).name === '@kepler.gl/mcp') {
+          return join(dir, 'skill/kepler');
+        }
+      } catch {
+        // malformed package.json — keep walking up
+      }
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error('Could not resolve the @kepler.gl/mcp package directory');
+}
+
+const MCP_SKILL_DIR = resolveMcpSkillDir();
 
 /**
  * @param {string} dir
@@ -89,8 +115,8 @@ function main() {
     files: readSkillFiles(path)
   }));
 
-  // Kepler skill from the vendored map surface (src/mcp/skill/kepler), with
-  // harness notes appended.
+  // Kepler skill from the @kepler.gl/mcp package (skill/kepler), with harness
+  // notes appended.
   const keplerSkillDir = MCP_SKILL_DIR;
   const keplerFiles = readSkillFiles(keplerSkillDir);
   if (existsSync(HARNESS_FILE)) {

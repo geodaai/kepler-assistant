@@ -1,8 +1,9 @@
 import type {RoomCommand} from '@sqlrooms/room-store';
 import {z} from 'zod';
 import {runAnalysis} from '../analysis';
-import type {KeplerContext} from '../mcp';
-import {getGeometriesFromDataset, datasetNameToTableName} from '../glue/utils';
+import type {KeplerContext} from '@kepler.gl/mcp';
+import {getGeometriesFromDataset} from '../glue/utils';
+import {datasetNameToTableName} from '@kepler.gl/mcp';
 import {getTableAsGeoJSON, saveGeojsonToDuckdb} from '../glue/duckdb-cache';
 import {getRoutingCommand} from './routing-command';
 
