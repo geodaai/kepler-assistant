@@ -13,6 +13,7 @@ import {Settings2} from 'lucide-react';
 import {AppChatActions} from './AppChatActions';
 import {AppChatTextOutput} from './AppChatTextOutput';
 import {AppChatTurn} from './AppChatTurn';
+import {SessionlessModelSelector} from './SessionlessModelSelector';
 
 // Hoist every registered ECharts renderer. Deriving the list from the
 // renderer registry (rather than hardcoding chart names) makes a registered-
@@ -173,7 +174,12 @@ export function MainView() {
           />
           <div className="flex items-center justify-end gap-2">
             <Chat.PromptSuggestions.VisibilityToggle />
-            <Chat.ModelSelector />
+            {/* SessionlessModelSelector (not Chat.ModelSelector): the stock
+            selector returns null before a session exists, which is exactly the
+            state the inline API-key composer renders in — leaving first-time
+            users with no way to pick a provider. This variant works without a
+            session and creates one on change. */}
+            <SessionlessModelSelector />
           </div>
         </Chat.Composer>
       </Chat.Root>
