@@ -12,7 +12,7 @@
  */
 
 import {getConnector} from '../glue/utils';
-import {getKeplerContext} from '../store';
+import {getKeplerContext} from '../kepler-context';
 import {createKeplerBridge} from './bridge';
 // Import the browser-safe engine subpath (not the full index, which pulls the
 // Node MCP server + hub). AnalysisEngine + ToolResult are exported here.

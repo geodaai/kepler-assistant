@@ -21,163 +21,23 @@ import {
 } from '@sqlrooms/room-store';
 import {createDuckDbSlice, DuckDbSliceState} from '@sqlrooms/duckdb';
 import type {ToolRendererRegistry} from '@sqlrooms/ai';
-import {
-  AI_SETTINGS,
-  KeplerSkillStorage,
-  SEED_SKILLS,
-  createRunSkillTool,
-  createDiscoverSkillTool,
-  buildSkillsPromptFromListings,
-  getModel
-} from './chat';
-import {createKeplerAiInstructions} from './instructions';
-import {getEchartsToolRenderers, setChartSelectionHandler} from './tools/echarts-renderers';
-import {
-  highlightRows,
-  setStoreConnectorProvider,
-  getValuesFromDataset,
-  getDatasetContext,
-  getConnector
-} from './glue/utils';
-import {loadTableToKepler} from './glue/duckdb-cache';
-import {loadTableIntoDuckDB} from './commands/query-commands';
+import {AI_SETTINGS} from './chat';
+import {getEchartsToolRenderers} from './tools/echarts-renderers';
+import {setStoreConnectorProvider} from './glue/utils';
 import {createWrappedQueryTool} from './tools/query-tool-wrapper';
 import {getAllCommands, KEPLER_COMMAND_OWNER} from './commands';
-import {layerSetIsValid} from '@kepler.gl/actions';
-import type {KeplerContext, KeplerStateAccessors, VisState} from './mcp';
-import type {SkillListing} from '@sqlrooms/ai';
-import {createRegistryChatSurface} from './mcp/chat-surface';
+import {getKeplerContext} from './kepler-context';
+import {createKeplerAssistantInstructions, createKeplerAssistantTools} from './assistant-tools';
+
+// Preserve the standalone entry's existing public exports.
+export * from './kepler-context';
+export {skillStorage} from './assistant-tools';
 
 export type RoomState = BaseRoomStoreState &
   DuckDbSliceState &
   AiSliceState &
   AiSettingsSliceState &
   CommandSliceState;
-
-let reduxStore: any = null;
-
-// App-provided accessors for the kepler.gl application state the assistant
-// needs. The host app supplies these via `setKeplerStateAccessors` so this
-// module does not hard-code a redux state shape; any host app can provide
-// accessors matching its own store. The reduxStore remains the generic Redux
-// dispatch bridge (dispatch is not app-specific).
-let keplerStateAccessors: KeplerStateAccessors | null = null;
-
-export function setReduxStore(store: any) {
-  reduxStore = store;
-  // Dev-only hook: expose the redux store so browser validation harnesses can
-  // inspect kepler.gl's visState (datasets, layers) directly.
-  if (typeof window !== 'undefined') {
-    (window as any).__keplerReduxStore = store;
-  }
-  // Wire the chart brush-selection callback now that redux is available, so the
-  // standalone chart renderers (histogram + boxplot) can highlight the brushed
-  // rows on the map. The chart renderers surface tool output produced by skill
-  // sub-agents.
-  setChartSelectionHandler((datasetName, selectedIndices) => {
-    const visState = keplerStateAccessors?.getVisState();
-    if (!visState) return;
-    highlightRows(
-      visState.datasets,
-      visState.layers,
-      datasetName,
-      selectedIndices,
-      (layer: any, isValid: boolean) => reduxStore?.dispatch(layerSetIsValid(layer, isValid))
-    );
-  });
-}
-
-/**
- * Provide accessors to the kepler.gl visState and map boundary. The host app
- * calls this (or passes `stateAccessors` to `AiAssistantPanel`) so the module
- * never hard-codes a redux state path. `reduxStore` is set separately via
- * `setReduxStore` and remains the dispatch bridge.
- */
-export function setKeplerStateAccessors(accessors: KeplerStateAccessors) {
-  keplerStateAccessors = accessors;
-}
-
-export function getReduxStore() {
-  return reduxStore;
-}
-
-export function getReduxDispatch() {
-  return reduxStore?.dispatch;
-}
-
-export function getKeplerVisState() {
-  return keplerStateAccessors?.getVisState();
-}
-
-export function getKeplerContext(): KeplerContext {
-  const ctx: KeplerContext = {
-    getVisState: () => keplerStateAccessors?.getVisState() as VisState,
-    getMapBoundary: () => keplerStateAccessors?.getMapBoundary(),
-    getMapboxToken: () => {
-      const apiKey = typeof window !== 'undefined' ? localStorage.getItem('mapbox-token') : null;
-      return apiKey || undefined;
-    },
-    dispatch: (action: any) => reduxStore?.dispatch(action),
-    // The kepler-app-bound glue methods. Implemented here (in the host-facing
-    // store) so the map.* commands in the vendored map surface (./mcp) stay
-    // free of the DuckDB / kepler-app wiring.
-    getValuesFromDataset: (datasetName, variableName) => {
-      const visState = keplerStateAccessors?.getVisState();
-      if (!visState) return [];
-      return getValuesFromDataset(visState.datasets, visState.layers, datasetName, variableName);
-    },
-    getDatasetContext: () => {
-      const visState = keplerStateAccessors?.getVisState();
-      return getDatasetContext(visState?.datasets, visState?.layers);
-    },
-    loadTableToKepler: (tableName, options) => loadTableToKepler(ctx, tableName, options),
-    loadTableIntoDuckDB: (datasetName, variableNames, dbTableName) =>
-      loadTableIntoDuckDB(
-        async (ds, v) => {
-          const visState = keplerStateAccessors?.getVisState();
-          if (!visState) return [];
-          return getValuesFromDataset(visState.datasets, visState.layers, ds, v);
-        },
-        datasetName,
-        variableNames,
-        dbTableName
-      ),
-    getConnector: () => getConnector()
-  };
-  return ctx;
-}
-
-/**
- * Singleton skill storage for the assistant. Lives for the page's lifetime.
- * Exported so future skill-authoring UI can reach it directly. Seeded with the
- * kepler-flavored default skills bundled into kepler-assistant (`SEED_SKILLS`).
- */
-export const skillStorage = new KeplerSkillStorage(SEED_SKILLS);
-
-/**
- * Cached skill listings used when building the orchestrator's system prompt.
- * Kept outside the store so the prompt read path stays synchronous; the cache
- * is refreshed whenever storage mutates.
- */
-let cachedListings: SkillListing[] = [];
-
-let refreshSeq = 0;
-async function refreshSkillListings() {
-  const seq = ++refreshSeq;
-  try {
-    const next = await skillStorage.listSkills();
-    if (seq === refreshSeq) cachedListings = next;
-  } catch (err) {
-    console.error('[store] Failed to refresh skill listings:', err);
-  }
-}
-
-// Initial seed — fire-and-forget is safe, the storage constructor already
-// populated the built-in root synchronously.
-void refreshSkillListings();
-skillStorage.subscribe?.(() => {
-  void refreshSkillListings();
-});
 
 export const {roomStore, useRoomStore} = createRoomStore<RoomState>(
   persistSliceConfigs<RoomState>(
@@ -220,11 +80,7 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>(
       ...createAiSlice({
         config: createDefaultAiConfig(),
 
-        getInstructions: () => {
-          const base = createKeplerAiInstructions(store);
-          const skillsBlock = buildSkillsPromptFromListings(cachedListings);
-          return skillsBlock ? `${base}\n\n${skillsBlock}` : base;
-        },
+        getInstructions: createKeplerAssistantInstructions,
 
         toolRenderers: {
           ...createDefaultAiToolRenderers(),
@@ -238,13 +94,7 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>(
           // that runs against the kepler tools' DuckDB connector and surfaces
           // the first N rows as a ~1000-char preview. See query-tool-wrapper.ts.
           query: createWrappedQueryTool(),
-          discoverSkill: createDiscoverSkillTool({store, storage: skillStorage}),
-          runSkill: createRunSkillTool({
-            store,
-            storage: skillStorage,
-            getChatToolSurface: () => chatToolSurface,
-            getModel: () => getModel(store)
-          })
+          ...createKeplerAssistantTools(store)
         } as any
       })(set, get, store)
     })
@@ -257,13 +107,6 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>(
 if (typeof window !== 'undefined') {
   (window as any).__keplerRoomStore = roomStore;
 }
-
-// The kepler-agnostic tool surface the harness dispatches through. The kepler
-// command registry (registered below) is exposed as this surface, so the chat
-// harness (executeApi / runSkillTool) never depends on the registry directly.
-// Built after `roomStore` exists so `createRegistryChatSurface` can read its
-// state.
-const chatToolSurface = createRegistryChatSurface(roomStore);
 
 // Wire the room store's DuckDB connector into the kepler tools layer so that
 // skills (which materialize kepler datasets into DuckDB via tools/utils.ts

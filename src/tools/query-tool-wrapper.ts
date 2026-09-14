@@ -49,7 +49,7 @@ export const QueryToolParameters = z.object({
  * imports this module's `createWrappedQueryTool`, so we require it lazily.
  */
 async function getVisState(): Promise<any> {
-  const {getKeplerVisState} = await import('../store');
+  const {getKeplerVisState} = await import('../kepler-context');
   return getKeplerVisState();
 }
 

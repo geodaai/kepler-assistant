@@ -12,6 +12,79 @@ command registry in as the `ChatToolSurface`. MCP is an optional transport —
 `src/assistant-server.ts` wraps the same tools for serving over stdio/HTTP
 (`dist/cli.js`).
 
+
+## Use an existing SQLRooms store
+
+Import from `@openassistant/kepler-assistant/integration` when your application
+owns its room store. This entry exposes the Kepler bridge, command catalog,
+skill tools, chart renderers, and map controls without constructing the
+standalone room or opening a database. The root entry continues to provide
+`AiAssistantPanel`, `roomStore`, and `useRoomStore` for standalone consumers.
+Use the integration subpath for **all** Kepler Assistant imports in a host app;
+importing the root also initializes its standalone store.
+
+Within your usual SQLRooms slice composition:
+
+```ts
+import {
+  AI_SETTINGS,
+  createKeplerAssistantInstructions,
+  createKeplerAssistantTools,
+  getAllCommands,
+  getKeplerContext,
+  getEchartsToolRenderers,
+  KEPLER_COMMAND_OWNER,
+  setKeplerStateAccessors,
+  setReduxStore,
+  setStoreConnectorProvider
+} from '@openassistant/kepler-assistant/integration';
+
+// Inside the host's (set, get, store) initializer, alongside its base, db,
+// command, layout, and other slices:
+const settingsSlice = createAiSettingsSlice({config: AI_SETTINGS})(set, get, store);
+const aiSlice = createAiSlice({
+  getInstructions: () =>
+    `${createDefaultAiInstructions(store)}\n\n${createKeplerAssistantInstructions()}`,
+  tools: {
+    ...createDefaultAiTools(store),
+    ...createKeplerAssistantTools(store)
+  },
+  toolRenderers: {
+    ...createDefaultAiToolRenderers(),
+    ...getEchartsToolRenderers()
+  }
+})(set, get, store);
+
+// After constructing the host room, before invoking commands or skills:
+setReduxStore(reduxStore);
+setKeplerStateAccessors(stateAccessors);
+setStoreConnectorProvider(() => roomStore.getState().db.getConnector());
+registerCommandsForOwner(
+  roomStore,
+  KEPLER_COMMAND_OWNER,
+  Object.values(getAllCommands(getKeplerContext()))
+);
+```
+
+The slice functions, default tools/instructions/renderers, and
+`registerCommandsForOwner` above come from `@sqlrooms/ai` and
+`@sqlrooms/room-store`. Merge `settingsSlice` and `aiSlice` into the host state.
+Render SQLRooms' `Chat` under the host's `RoomStateProvider`; the host owns
+persistence, database lifetime, and table-schema refreshes after map or command
+changes. `getEchartsToolRenderers()` handles skill `executeApi` outputs;
+SQLRooms' `execute_command` output has a different envelope and needs an adapter
+if you want the same chart UI for direct command calls.
+
+The Kepler map bridge, analysis engine, and default skill storage remain
+page-wide. This API supports one active host/map context per page; it does not
+isolate several independent assistants. The tool factory binds each skill to
+the supplied store's AI state and command registry, and can be called during
+slice construction without reading uninitialized state.
+
+Git dependencies run `prepack` to compile the committed skill bundle into
+`dist/`, requiring no sibling checkout. `pnpm build` and `pnpm publish` still
+regenerate skills from their source, including `GEODA_SKILL_DIR`.
+
 ```
    kepler.gl demo-app                  MCP server mode
    ┌─────────────────────────────┐    ┌─────────────────────────────┐

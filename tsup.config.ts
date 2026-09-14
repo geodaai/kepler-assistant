@@ -25,6 +25,7 @@ import {defineConfig} from 'tsup';
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
+    integration: 'src/integration.ts',
     agent: 'src/agent.ts',
     'analysis-commands': 'src/analysis-commands.ts',
     'chat-surface': 'src/chat-surface.ts',
