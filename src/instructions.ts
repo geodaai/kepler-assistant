@@ -1,6 +1,4 @@
-import type {StoreApi} from 'zustand';
-import type {DuckDbSliceState} from '@sqlrooms/duckdb';
-import {getKeplerVisState} from './store';
+import {getKeplerVisState} from './kepler-context';
 import {getDatasetContext} from './glue/utils';
 
 /**
@@ -9,15 +7,10 @@ import {getDatasetContext} from './glue/utils';
  * and the currently loaded kepler.gl datasets/layers (name, fields, geometry).
  *
  * The dataset context is read live from the kepler.gl Redux `visState` on every
- * call (getInstructions runs fresh per chat request), matching the original
- * assistant behavior, so the schema always reflects the datasets currently on
- * the map. We intentionally do NOT read `store.getState().db.tables` here: the
- * tools use a standalone DuckDB connector separate from the store's DuckDB
- * slice, so that cache is never populated.
+ * call, so the map context reflects the currently loaded datasets. Hosts can
+ * combine this with SQLRooms' default instructions for the SQL table catalog.
  */
-export function createKeplerAiInstructions(
-  _store: StoreApi<DuckDbSliceState & Record<string, unknown>>
-): string {
+export function createKeplerAiInstructions(): string {
   const visState = getKeplerVisState();
   const datasetContext = getDatasetContext(visState?.datasets, visState?.layers);
 

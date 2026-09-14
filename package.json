@@ -25,6 +25,10 @@
     "./chat": {
       "types": "./dist/chat/index.d.ts",
       "import": "./dist/chat/index.js"
+    },
+    "./integration": {
+      "types": "./dist/integration.d.ts",
+      "import": "./dist/integration.js"
     }
   },
   "scripts": {
