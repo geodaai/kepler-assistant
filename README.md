@@ -12,7 +12,6 @@ command registry in as the `ChatToolSurface`. MCP is an optional transport —
 `src/assistant-server.ts` wraps the same tools for serving over stdio/HTTP
 (`dist/cli.js`).
 
-
 ## Use an existing SQLRooms store
 
 Import from `@openassistant/kepler-assistant/integration` when your application
@@ -80,10 +79,6 @@ page-wide. This API supports one active host/map context per page; it does not
 isolate several independent assistants. The tool factory binds each skill to
 the supplied store's AI state and command registry, and can be called during
 slice construction without reading uninitialized state.
-
-Git dependencies run `prepack` to compile the committed skill bundle into
-`dist/`, requiring no sibling checkout. `pnpm build` and `pnpm publish` still
-regenerate skills from their source, including `GEODA_SKILL_DIR`.
 
 ```
    kepler.gl demo-app                  MCP server mode

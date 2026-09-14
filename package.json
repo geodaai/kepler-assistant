@@ -37,7 +37,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "prepack": "tsup",
     "prepublishOnly": "pnpm build"
   },
   "engines": {
