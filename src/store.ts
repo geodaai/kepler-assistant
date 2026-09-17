@@ -21,7 +21,7 @@ import {
 } from '@sqlrooms/room-store';
 import {createDuckDbSlice, DuckDbSliceState} from '@sqlrooms/duckdb';
 import type {ToolRendererRegistry} from '@sqlrooms/ai';
-import {AI_SETTINGS} from './chat';
+import {AI_SETTINGS, getChatModel} from './chat';
 import {getEchartsToolRenderers} from './tools/echarts-renderers';
 import {setStoreConnectorProvider} from './glue/utils';
 import {createWrappedQueryTool} from './tools/query-tool-wrapper';
@@ -79,6 +79,13 @@ export const {roomStore, useRoomStore} = createRoomStore<RoomState>(
 
       ...createAiSlice({
         config: createDefaultAiConfig(),
+
+        // Build the chat model here rather than letting @sqlrooms/ai-core build
+        // its own OpenAI-compatible client: that client can't carry provider
+        // request headers, and anthropic's CORS preflight fails without
+        // `anthropic-dangerous-direct-browser-access`. Returns undefined until
+        // the selected provider has a key, so the API-key input still shows.
+        getCustomModel: () => getChatModel(store),
 
         getInstructions: createKeplerAssistantInstructions,
 

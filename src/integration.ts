@@ -4,6 +4,7 @@
  * Use this subpath consistently in a host app; the root entry is standalone.
  */
 export {AI_SETTINGS} from './chat/config';
+export {getChatModel} from './chat/getModel';
 export {
   createKeplerAssistantInstructions,
   createKeplerAssistantTools,
