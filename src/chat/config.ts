@@ -9,6 +9,23 @@ export const PROVIDER_DEFAULT_BASE_URLS: Record<string, string> = {
   ollama: 'http://localhost:11434/v1'
 };
 
+/**
+ * Extra request headers some providers need when the client runs in the page.
+ *
+ * Anthropic's API treats a plain browser request as disallowed: the CORS
+ * preflight (`OPTIONS`) comes back `400 Disallowed CORS origin` with no
+ * `access-control-allow-origin`, so the browser drops the real request and the
+ * app only sees `Failed to fetch`. Opting in with this header makes the
+ * preflight succeed and the request go through. It is required even though the
+ * base URL above is the OpenAI-compatible endpoint — that path has the same
+ * browser gate.
+ *
+ * Providers absent from this map are sent as-is.
+ */
+export const PROVIDER_REQUEST_HEADERS: Record<string, Record<string, string>> = {
+  anthropic: {'anthropic-dangerous-direct-browser-access': 'true'}
+};
+
 export const LLM_MODELS = [
   {name: 'openai', models: ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna']},
   {name: 'anthropic', models: ['claude-opus-5', 'claude-sonnet-5']},
